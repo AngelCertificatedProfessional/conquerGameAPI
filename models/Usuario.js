@@ -27,10 +27,11 @@ const UsuarioSchema = mongoose.Schema({
         type:Date,
         default:Date.now
     },
-    creadoPor:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'usuarios'
-    }
+    rol:{
+        type:Number,
+        required: true,
+        emun: [1,2,3]
+    },
 })
 
 UsuarioSchema.index({usuario:'text'})
