@@ -69,3 +69,16 @@ exports.iniciarSecion = async(req,res) => {
         });
     }
 }
+
+const validaSesionUsuario = exports.validaSesionUsuario = async(_id) =>{
+    try{
+        const _idUsuario = Buffer.from(_id, 'base64').toString('ascii');
+        const usuario = await Usuario.findOne({_id:_idUsuario});
+        if(!usuario) {
+            return false;
+        }
+        return true;
+    }catch(error){
+        return false;
+    }
+}

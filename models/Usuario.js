@@ -32,6 +32,9 @@ const UsuarioSchema = mongoose.Schema({
         required: true,
         emun: [1,2,3]
     },
+    partidas:{
+        type:Array
+    },
 })
 
 UsuarioSchema.index({usuario:'text'})
