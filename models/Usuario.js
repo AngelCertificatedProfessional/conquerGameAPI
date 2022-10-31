@@ -31,10 +31,7 @@ const UsuarioSchema = mongoose.Schema({
         type:Number,
         required: true,
         emun: [1,2,3]
-    },
-    partidas:{
-        type:Array
-    },
+    }
 })
 
 UsuarioSchema.index({usuario:'text'})
