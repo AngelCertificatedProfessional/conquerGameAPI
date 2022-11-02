@@ -13,11 +13,9 @@ const socketController = (socket) => {
 
 }
 
-const enviarMensajeLobby =(numeroPartida) => {
-    console.log('partida'+numeroPartida)
-    socketN.emit('partida'+numeroPartida,'hola')
-    socketN.emit('partida','partida')
-    // socketN.broadcast.emit('partida'+numeroPartida,payload)
+const enviarMensajeLobby =(vResultado) => {
+    //console.log('entre')
+    socketN.emit('partida'+vResultado.numeroPartida,vResultado)
 }
 
 module.exports = {

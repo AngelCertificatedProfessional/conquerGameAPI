@@ -5,10 +5,6 @@ const PartidaSchema = mongoose.Schema({
         type:Number,
         required: [true,'El numero de la partida es automaticva'],
     },
-    activa:{
-        type:Boolean,
-        required: [true,'La patida debe o no estar activa'],
-    },
     usuario_id:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'usuarios'
@@ -30,7 +26,13 @@ const PartidaSchema = mongoose.Schema({
     jugadores:{
         type:Array,
         required:true
-    }
+    },
+    estatus:{
+        type:Number,
+        required:true,
+        emun: [1,2,3,4] //1. Buscando jugadores,2. Agregar piezas Tablero. 3.Juego Iniciado
+    },
+
 })
 
 module.exports = mongoose.model('Partida',PartidaSchema,'partida')

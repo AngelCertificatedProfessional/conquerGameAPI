@@ -25,12 +25,12 @@ exports.crearPartida =  async (req,res) =>{
         //Se arma segmento para el lado de la partida
         const partida = new Partida()
         partida.numeroPartida = vResultado.random;
-        partida.activa = true;
         partida.usuario_id = usuario._id;
         partida.catidadJugadores = true;
         partida.tipoJuego = req.body.tipoJuego;
         partida.catidadJugadores = req.body.catidadJugadores;
         partida.juego = 1;
+        partida.estatus = 1;
         partida.jugadores.push(usuario);
         await partida.save();
         
@@ -55,7 +55,7 @@ exports.buscarPartida =  async (req,res) =>{
             throw "El usuario no tiene derecho a utilizar este metodo"
         }
         console.log(req.params.numeroPartida)
-        const partida = await Partida.findOne({numeroPartida:req.params.numeroPartida,activa:true})
+        const partida = await Partida.findOne({numeroPartida:req.params.numeroPartida})
         if(!partida){
             nNumeroError = 503;
             throw 'No se encontro la partida'
@@ -83,11 +83,71 @@ exports.buscarPartida =  async (req,res) =>{
     }
 }
 
+exports.buscarEstatusPartida =  async (req,res) =>{
+    let nNumeroError = 500;
+    try{
+        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
+            throw "El usuario no tiene derecho a utilizar este metodo"
+        }
+        
+        const partida = await Partida.findOne({numeroPartida:req.params.numeroPartida})
+        if(!partida){
+            nNumeroError = 503;
+            throw 'No se encontro la partida'
+        }
+        enviarMensajeLobby(partida);
+        
+        Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
 
+        return res.json({
+            message: 'Partida encontrada.',
+            data:partida.numeroPartida
+        });
+    }catch(error){
+        Request.crearRequest('buscarPartida',JSON.stringify(req.body),nNumeroError,error);
+        res.status(nNumeroError).json({
+            error: 'Algo salio mal',
+            data: error.toString()
+        });
+    }
+}
+
+exports.agregarPiezasTablero =  async (req,res) =>{
+    let nNumeroError = 500;
+    try{
+        
+        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
+            throw "El usuario no tiene derecho a utilizar este metodo"
+        }
+        
+        const partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+        if(!partida){
+            nNumeroError = 503;
+            throw 'No se encontro la partida'
+        }
+        
+        partida.estatus = 2;
+        partida.save()
+        enviarMensajeLobby(partida)
+        
+        Request.crearRequest('agregarPiezasTablero',JSON.stringify(req.body),200);
+
+        return res.json({
+            message: 'Agregar configurtacion partida.',
+            data:partida.numeroPartida
+        });
+    }catch(error){
+        Request.crearRequest('agregarPiezasTablero',JSON.stringify(req.body),nNumeroError,error);
+        res.status(nNumeroError).json({
+            error: 'Algo salio mal',
+            data: error.toString()
+        });
+    }
+}
 
 const validaPartidaExistente = async(numeroPartida) =>{
     try{
-        const partida = await Partida.findOne({numeroPartida:numeroPartida,activa:true});
+        const partida = await Partida.findOne({numeroPartida:numeroPartida,estatus:{$ne:3}});
         if(!partida) {
             return false;
         }
