@@ -54,7 +54,6 @@ exports.buscarPartida =  async (req,res) =>{
         if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
             throw "El usuario no tiene derecho a utilizar este metodo"
         }
-        console.log(req.params.numeroPartida)
         const partida = await Partida.findOne({numeroPartida:req.params.numeroPartida})
         if(!partida){
             nNumeroError = 503;
@@ -67,8 +66,6 @@ exports.buscarPartida =  async (req,res) =>{
         await partida.save();
 
         Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
-
-        enviarMensajeLobby(req.params.numeroPartida)
 
         return res.json({
             message: 'Partida encontrada.',
@@ -95,7 +92,8 @@ exports.buscarEstatusPartida =  async (req,res) =>{
             nNumeroError = 503;
             throw 'No se encontro la partida'
         }
-        enviarMensajeLobby(partida);
+
+        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
         
         Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
 
@@ -144,6 +142,49 @@ exports.agregarPiezasTablero =  async (req,res) =>{
         });
     }
 }
+
+exports.desconectarUsuarioPartida = async (req,res) =>{
+    let nNumeroError = 500;
+    try{
+        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
+            throw "El usuario no tiene derecho a utilizar este metodo"
+        }
+        
+        let partida = await Partida.findOne({numeroPartida:req.params.numeroPartida})
+        if(!partida){
+            nNumeroError = 503;
+            throw 'No se encontro la partida'
+        }
+
+        //Se arma segmento para el lado del usuario
+        const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
+
+        await Partida.updateOne(
+            { _id:  req.params.numeroPartida },
+            {
+              $pull: { 'jugadores._id': mongoose.Types.ObjectId(usuario._id) },
+            }
+        );
+        partida = await Partida.findOne({numeroPartida:req.params.numeroPartida})
+        console.log('pase e')
+        enviarMensajeLobby(partida);
+        
+        Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
+
+        return res.json({
+            message: 'Partida encontrada.',
+            data:partida.numeroPartida
+        });
+    }catch(error){
+        Request.crearRequest('buscarPartida',JSON.stringify(req.body),nNumeroError,error);
+        res.status(nNumeroError).json({
+            error: 'Algo salio mal',
+            data: error.toString()
+        });
+    }
+}
+
+
 
 const validaPartidaExistente = async(numeroPartida) =>{
     try{

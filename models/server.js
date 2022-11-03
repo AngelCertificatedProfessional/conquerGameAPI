@@ -23,11 +23,12 @@ class Server {
 
         //Midlewares
         this.middlewares();
-        //Rutas de mi aplicacion
-        this.routes();
     
         //sockets
         this.sockets();
+
+        //Rutas de mi aplicacion
+        this.routes();
 
     }
 
@@ -47,13 +48,16 @@ class Server {
 
     }
 
-    routes(){
-        this.app.use(this.paths.usuarios,require('../routes/usuarios'))
-        this.app.use(this.paths.conquerGame,require('../routes/conquerGame'))
-    }
+
 
     sockets(){
         this.io.on('connection',socketController)
+    }
+
+    routes(){
+        this.app.use(this.paths.usuarios,require('../routes/usuarios'))
+        this.app.use(this.paths.conquerGame,require('../routes/conquerGame'))
+        this.app.set('socketIo', this.io);
     }
 
     listen(){

@@ -1,21 +1,28 @@
-let  socketN;
+// let  socketN;
 const socketController = (socket) => {
     console.log('jugador conectado',socket.id)
-    socketN = socket;
+    // socketN = socket;
     socket.on('disconnect', () => {
         console.log('Cliente desconectado',socket.id)
     })
 
     socket.on('enviar-mensaje',(payload) => {
         console.log(payload)
-        //socket.broadcast.emit('enviar-mensaje',payload)
+        let vResultado = {};
+        vResultado.estatus = 6
+        vResultado.numeroPartida = payload.numeroPartida;
+        io.sockets.emit('partida'+vResultado.numeroPartida,vResultado)
+        socket.broadcast.emit('partida'+vResultado.numeroPartida,vResultado)
     })
 
 }
 
+// const enviarMensajeLobby =(vResultado) => {
+//     console.log('entre'+'partida'+vResultado.numeroPartida)
+//     socketN.emit('partida'+vResultado.numeroPartida,vResultado)
+// }
+
 const enviarMensajeLobby =(vResultado) => {
-    //console.log('entre')
-    socketN.emit('partida'+vResultado.numeroPartida,vResultado)
 }
 
 module.exports = {
