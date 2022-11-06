@@ -9,7 +9,7 @@ const PartidaSchema = mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'usuarios'
     },
-    catidadJugadores:{
+    cantidadJugadores:{
         type:Number,
         required:true,
     },
