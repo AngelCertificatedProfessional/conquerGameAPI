@@ -2,6 +2,7 @@ const Request = require('./requestController')
 const Usuarios = require('./UsuarioController')
 const Usuario = require('../models/Usuario')
 const Partida = require('../models/Partida')
+const mongoose = require('mongoose')
 exports.crearPartida =  async (req,res) =>{
     try{
         
@@ -113,7 +114,7 @@ exports.buscarEstatusPartida =  async (req,res) =>{
     }
 }
 
-exports.agregarPiezasTablero =  async (req,res) =>{
+exports.mostrarTablero =  async (req,res) =>{
     let nNumeroError = 500;
     try{
         
@@ -131,14 +132,14 @@ exports.agregarPiezasTablero =  async (req,res) =>{
         partida.save()
         req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
         
-        Request.crearRequest('agregarPiezasTablero',JSON.stringify(req.body),200);
+        Request.crearRequest('mostrarTablero',JSON.stringify(req.body),200);
 
         return res.json({
             message: 'Agregar configurtacion partida.',
             data:partida.numeroPartida
         });
     }catch(error){
-        Request.crearRequest('agregarPiezasTablero',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest('mostrarTablero',JSON.stringify(req.body),nNumeroError,error);
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()
@@ -187,7 +188,54 @@ exports.agregarPiezasTablero =  async (req,res) =>{
 //     }
 // }
 
+exports.agregarPiezasTablero =  async (req,res) =>{
+    let nNumeroError = 500;
+    try{
+        
+        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
+            throw "El usuario no tiene derecho a utilizar este metodo"
+        }
+        
+        let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+        if(!partida){
+            nNumeroError = 503;
+            throw 'No se encontro la partida'
+        }
+        await Partida.updateOne(
+            {
+                numeroPartida:req.body.numeroPartida,
+                'jugadores._id':new mongoose.Types.ObjectId(Buffer.from(req.headers.authorization, 'base64').toString('ascii'))
+            }, 
+            { 
+                $set: { 
+                    "jugadores.$.posicionPiezasJugador" : req.body.piezas,
+                    "jugadores.$.listo" : true
+                }
+            }
+        );
 
+        if(partida.jugadores.filter(x => x.listo === true).length +1 === partida.cantidadJugadores){
+            partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+            partida.estatus = 3;
+            partida.save()
+            req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
+        }
+            
+        
+        Request.crearRequest('agregarPiezasTablero',JSON.stringify(req.body),200);
+
+        return res.json({
+            message: 'Agregar configurtacion partida.',
+            data:partida.numeroPartida
+        });
+    }catch(error){
+        Request.crearRequest('agregarPiezasTablero',JSON.stringify(req.body),nNumeroError,error);
+        res.status(nNumeroError).json({
+            error: 'Algo salio mal',
+            data: error.toString()
+        });
+    }
+}
 
 const validaPartidaExistente = async(numeroPartida) =>{
     try{

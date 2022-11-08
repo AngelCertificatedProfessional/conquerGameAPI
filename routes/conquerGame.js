@@ -5,6 +5,7 @@ const router = Router();
 router.post('/crearPartida',ConquerGameController.crearPartida);
 router.get('/buscarPartida/:numeroPartida',ConquerGameController.buscarPartida);
 router.get('/buscarEstatusPartida/:numeroPartida',ConquerGameController.buscarEstatusPartida);
+router.patch('/mostrarTablero',ConquerGameController.mostrarTablero);
 router.patch('/agregarPiezasTablero',ConquerGameController.agregarPiezasTablero);
 // router.patch('/desconectarUsuarioPartida',ConquerGameController.desconectarUsuarioPartida);
 module.exports = router;
