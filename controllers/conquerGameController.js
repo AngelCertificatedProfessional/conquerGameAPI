@@ -259,11 +259,13 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
             }, 
             { 
                 $set: { 
-                    posicionPiezasGlobal : req.body.posicionPiezasGlobal
+                    posicionPiezasGlobal : req.body.posicionPiezasGlobal,
+                    turno: req.body.turno
                 }
             }
         );
         partida.posicionPiezasGlobal = req.body.posicionPiezasGlobal;
+        partida.turno = req.body.turno;
         req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);    
         
         Request.crearRequest('actualizarPiezasPosicionJuego',JSON.stringify(req.body),200);
