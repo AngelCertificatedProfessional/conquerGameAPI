@@ -237,6 +237,50 @@ exports.agregarPiezasTablero =  async (req,res) =>{
     }
 }
 
+
+exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
+    let nNumeroError = 500;
+    try{
+        
+        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
+            throw "El usuario no tiene derecho a utilizar este metodo"
+        }
+        
+        let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+        console.log('entre')
+        if(!partida){
+            nNumeroError = 503;
+            throw 'No se encontro la partida'
+        }
+        console.log(req.body.posicionPiezasGlobal)
+        await Partida.updateOne(
+            {
+                numeroPartida:req.body.numeroPartida
+            }, 
+            { 
+                $set: { 
+                    posicionPiezasGlobal : req.body.posicionPiezasGlobal
+                }
+            }
+        );
+        partida.posicionPiezasGlobal = req.body.posicionPiezasGlobal;
+        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);    
+        
+        Request.crearRequest('actualizarPiezasPosicionJuego',JSON.stringify(req.body),200);
+
+        return res.json({
+            message: 'Agregar configurtacion partida.',
+            data:partida.numeroPartida
+        });
+    }catch(error){
+        Request.crearRequest('actualizarPiezasPosicionJuego',JSON.stringify(req.body),nNumeroError,error);
+        res.status(nNumeroError).json({
+            error: 'Algo salio mal',
+            data: error.toString()
+        });
+    }
+}
+
 const validaPartidaExistente = async(numeroPartida) =>{
     try{
         const partida = await Partida.findOne({numeroPartida:numeroPartida,estatus:{$ne:3}});

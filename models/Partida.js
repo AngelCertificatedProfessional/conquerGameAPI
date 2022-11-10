@@ -32,7 +32,10 @@ const PartidaSchema = mongoose.Schema({
         required:true,
         emun: [1,2,3,4] //1. Buscando jugadores,2. Agregar piezas Tablero. 3.Juego Iniciado
     },
-
+    posicionPiezasGlobal:{
+        type:Object,
+        required:false
+    },
 })
 
 module.exports = mongoose.model('Partida',PartidaSchema,'partida')
