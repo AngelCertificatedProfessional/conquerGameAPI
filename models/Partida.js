@@ -40,7 +40,13 @@ const PartidaSchema = mongoose.Schema({
         type:Number,
         required:false,
         emun: [0,1,2,3,4,5,6] //Representa a los 6 jugadores
+    },
+    ganador:{
+        type:String,
+        required:false,
+        emun: ['W','B','R','P'] //Representa a los 6 jugadores
     }
+
 })
 
 module.exports = mongoose.model('Partida',PartidaSchema,'partida')

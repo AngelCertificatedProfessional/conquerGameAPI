@@ -253,17 +253,38 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
             throw 'No se encontro la partida'
         }
         console.log(req.body.posicionPiezasGlobal)
-        await Partida.updateOne(
-            {
-                numeroPartida:req.body.numeroPartida
-            }, 
-            { 
-                $set: { 
-                    posicionPiezasGlobal : req.body.posicionPiezasGlobal,
-                    turno: req.body.turno
+
+        //evaluamos si los jugadores todavia poseen sus cuatro reyes
+        let arrResultado = Object.keys(req.body.posicionPiezasGlobal).filter(key => key.includes('rey') && req.body.posicionPiezasGlobal[key] !== '')
+        if(Object.keys(arrResultado).length == 1){
+            await Partida.updateOne(
+                {
+                    numeroPartida:req.body.numeroPartida
+                }, 
+                { 
+                    $set: { 
+                        posicionPiezasGlobal : req.body.posicionPiezasGlobal,
+                        turno: req.body.turno,
+                        estatus:4,
+                        ganador: arrResultado[0][0]
+                    }
                 }
-            }
-        );
+            );
+            partida.estatus = 4;
+            partida.ganador = arrResultado[0][0];
+        } else{
+            await Partida.updateOne(
+                {
+                    numeroPartida:req.body.numeroPartida
+                }, 
+                { 
+                    $set: { 
+                        posicionPiezasGlobal : req.body.posicionPiezasGlobal,
+                        turno: req.body.turno
+                    }
+                }
+            );
+        }
         partida.posicionPiezasGlobal = req.body.posicionPiezasGlobal;
         partida.turno = req.body.turno;
         req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);    
