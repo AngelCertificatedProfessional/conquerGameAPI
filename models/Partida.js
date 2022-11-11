@@ -44,7 +44,7 @@ const PartidaSchema = mongoose.Schema({
     ganador:{
         type:String,
         required:false,
-        emun: ['W','B','R','P'] //Representa a los 6 jugadores
+        emun: ['O','B','R','P'] //Representa a los 6 jugadores
     }
 
 })
