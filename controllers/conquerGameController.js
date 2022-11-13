@@ -3,6 +3,7 @@ const Usuarios = require('./UsuarioController')
 const Usuario = require('../models/Usuario')
 const Partida = require('../models/Partida')
 const mongoose = require('mongoose')
+const { convertirMongoAJson } = require('../utils/utils')
 exports.crearPartida =  async (req,res) =>{
     try{
         
@@ -214,12 +215,17 @@ exports.agregarPiezasTablero =  async (req,res) =>{
             }
         );
 
-        if(partida.jugadores.filter(x => x.listo === true).length +1 === partida.cantidadJugadores){
-            partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+        partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+        if(partida.jugadores.filter(x => x.listo === true).length === partida.cantidadJugadores){
             partida.estatus = 3;
             partida.save()
-            req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
+        }else{
+            const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
+            partida = convertirMongoAJson(partida)
+            partida.usuarioListo = usuario.usuario;
+            partida.notificarUsuarioListo = true;
         }
+        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
             
         
         Request.crearRequest('agregarPiezasTablero',JSON.stringify(req.body),200);
@@ -229,6 +235,7 @@ exports.agregarPiezasTablero =  async (req,res) =>{
             data:partida.numeroPartida
         });
     }catch(error){
+        console.log(error)
         Request.crearRequest('agregarPiezasTablero',JSON.stringify(req.body),nNumeroError,error);
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
