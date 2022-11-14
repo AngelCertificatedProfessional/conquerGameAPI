@@ -45,8 +45,12 @@ const PartidaSchema = mongoose.Schema({
         type:String,
         required:false,
         emun: ['O','B','R','P'] //Representa a los 6 jugadores
+    },
+    creadoEl:{
+        type:Date,
+        required:true,
+        default:Date.now
     }
-
 })
-
+PartidaSchema.index({creadoEl: 1},{expireAfterSeconds: 604800});
 module.exports = mongoose.model('Partida',PartidaSchema,'partida')
