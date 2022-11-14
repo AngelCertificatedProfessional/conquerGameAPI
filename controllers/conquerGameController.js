@@ -129,6 +129,11 @@ exports.mostrarTablero =  async (req,res) =>{
             throw 'No se encontro la partida'
         }
         
+        if(partida.jugadores.length < partida.cantidadJugadores){
+            nNumeroError = 504;
+            throw 'No se puede iniciar la partida porque todavia no se a completado la cantidad de jugadores'
+        }
+
         partida.estatus = 2;
         partida.save()
         req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
