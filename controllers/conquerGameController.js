@@ -223,6 +223,7 @@ exports.agregarPiezasTablero =  async (req,res) =>{
         partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
         if(partida.jugadores.filter(x => x.listo === true).length === partida.cantidadJugadores){
             partida.estatus = 3;
+            partida.fechaTurno = Date.now();
             partida.save()
         }else{
             const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
@@ -292,12 +293,14 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
                 { 
                     $set: { 
                         posicionPiezasGlobal : req.body.posicionPiezasGlobal,
-                        turno: req.body.turno
+                        turno: req.body.turno,
+                        fechaTurno : Date.now()
                     }
                 }
             );
         }
         partida.posicionPiezasGlobal = req.body.posicionPiezasGlobal;
+        console.log(Date.now());
         partida.turno = req.body.turno;
         req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);    
         

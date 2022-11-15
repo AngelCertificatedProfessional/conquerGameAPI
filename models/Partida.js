@@ -50,6 +50,10 @@ const PartidaSchema = mongoose.Schema({
         type:Date,
         required:true,
         default:Date.now
+    },
+    fechaTurno:{
+        type:Date,
+        required:false
     }
 })
 PartidaSchema.index({creadoEl: 1},{expireAfterSeconds: 604800});
