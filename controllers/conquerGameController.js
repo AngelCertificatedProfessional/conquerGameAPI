@@ -299,8 +299,9 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
                 }
             );
         }
+        partida = convertirMongoAJson(partida)
         partida.posicionPiezasGlobal = req.body.posicionPiezasGlobal;
-        console.log(Date.now());
+        partida.fechaTurno = Date.now();
         partida.turno = req.body.turno;
         req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);    
         
