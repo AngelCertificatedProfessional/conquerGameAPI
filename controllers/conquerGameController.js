@@ -280,6 +280,9 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
                         turno: req.body.turno,
                         estatus:4,
                         ganador: arrResultado[0][0]
+                    },
+                    $inc:{
+                        cantidadTurnosPartida:1
                     }
                 }
             );
@@ -295,6 +298,9 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
                         posicionPiezasGlobal : req.body.posicionPiezasGlobal,
                         turno: req.body.turno,
                         fechaTurno : Date.now()
+                    },
+                    $inc:{
+                        cantidadTurnosPartida:1
                     }
                 }
             );
