@@ -316,52 +316,40 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
         }
         
         let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
-        console.log('entre')
         if(!partida){
             nNumeroError = 503;
             throw 'No se encontro la partida'
         }
-        console.log(req.body.posicionPiezasGlobal)
 
         //evaluamos si los jugadores todavia poseen sus cuatro reyes
         let arrResultado = Object.keys(req.body.posicionPiezasGlobal).filter(key => key.includes('rey') && req.body.posicionPiezasGlobal[key] !== '')
+        
+        const vActualizar = {}
+        vActualizar.$set = {}
+        vActualizar.$set.posicionPiezasGlobal = req.body.posicionPiezasGlobal
+        if(req.body.hasOwnProperty('turno')){
+            vActualizar.$set.turno = req.body.turno
+        }
         if(Object.keys(arrResultado).length == 1){
-            await Partida.updateOne(
-                {
-                    numeroPartida:req.body.numeroPartida
-                }, 
-                { 
-                    $set: { 
-                        posicionPiezasGlobal : req.body.posicionPiezasGlobal,
-                        turno: req.body.turno,
-                        estatus:4,
-                        ganador: arrResultado[0][0]
-                    },
-                    $inc:{
-                        cantidadTurnosPartida:1
-                    }
-                }
-            );
+            vActualizar.$set.estatus = 4
+            vActualizar.$set.ganador = arrResultado[0][0]
+        }else{
+            vActualizar.$set.fechaTurno = Date.now()
+        }
+        vActualizar.$inc = {}
+        vActualizar.$inc.cantidadTurnosPartida = 1
+        await Partida.updateOne(
+            {
+                numeroPartida:req.body.numeroPartida
+            }, 
+            vActualizar
+        );
+        partida = convertirMongoAJson(partida)
+        //victorio de algun jugador
+        if(Object.keys(arrResultado).length == 1){
             partida.estatus = 4;
             partida.ganador = arrResultado[0][0];
-        } else{
-            await Partida.updateOne(
-                {
-                    numeroPartida:req.body.numeroPartida
-                }, 
-                { 
-                    $set: { 
-                        posicionPiezasGlobal : req.body.posicionPiezasGlobal,
-                        turno: req.body.turno,
-                        fechaTurno : Date.now()
-                    },
-                    $inc:{
-                        cantidadTurnosPartida:1
-                    }
-                }
-            );
-
-             await Usuario.updateMany(
+            await Usuario.updateMany(
                 {
                     numeroPartidaActual:req.body.numeroPartida
                 }, 
@@ -372,7 +360,7 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
                 }
             );
         }
-        partida = convertirMongoAJson(partida)
+        
         partida.posicionPiezasGlobal = req.body.posicionPiezasGlobal;
         partida.fechaTurno = Date.now();
         partida.turno = req.body.turno;
