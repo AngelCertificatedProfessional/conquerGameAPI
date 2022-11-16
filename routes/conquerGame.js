@@ -7,6 +7,8 @@ router.get('/buscarPartida/:numeroPartida',ConquerGameController.buscarPartida);
 router.get('/buscarEstatusPartida/:numeroPartida',ConquerGameController.buscarEstatusPartida);
 router.patch('/mostrarTablero',ConquerGameController.mostrarTablero);
 router.patch('/agregarPiezasTablero',ConquerGameController.agregarPiezasTablero);
+router.patch('/desconectarUsuarioPartida',ConquerGameController.desconectarUsuarioPartida);
+router.patch('/salirPartida',ConquerGameController.salirPartida);
 router.patch('/actualizarPiezasPosicionJuego',ConquerGameController.actualizarPiezasPosicionJuego);
 
 module.exports = router;

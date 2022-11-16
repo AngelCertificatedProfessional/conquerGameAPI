@@ -30,7 +30,11 @@ const UsuarioSchema = mongoose.Schema({
     rol:{
         type:Number,
         required: true,
-        emun: [1,2,3]
+        emun: [1,2,3] //tipousuario
+    },
+    numeroPartidaActual:{
+        type:Number,
+        required: false,
     }
 })
 

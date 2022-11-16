@@ -30,7 +30,7 @@ const PartidaSchema = mongoose.Schema({
     estatus:{
         type:Number,
         required:true,
-        emun: [1,2,3,4] //1. Buscando jugadores,2. Agregar piezas Tablero. 3.Juego Iniciado
+        emun: [1,2,3,4,5] //1. Buscando jugadores,2. Agregar piezas Tablero. 3.Juego Iniciado 4. Finalizado 5.cancelado
     },
     posicionPiezasGlobal:{
         type:Object,

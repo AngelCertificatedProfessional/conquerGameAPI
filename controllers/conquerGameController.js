@@ -34,7 +34,8 @@ exports.crearPartida =  async (req,res) =>{
         partida.estatus = 1;
         partida.jugadores.push(usuario);
         await partida.save();
-        
+        usuario.numeroPartidaActual = vResultado.random;
+        await usuario.save();
         Request.crearRequest('crearPartida',JSON.stringify(req.body),200);
         return res.json({
             message: 'La partida fue generado exitosamente',
@@ -69,6 +70,9 @@ exports.buscarPartida =  async (req,res) =>{
         const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
         partida.jugadores.push(usuario);
         await partida.save();
+
+        usuario.numeroPartidaActual = req.params.numeroPartida;
+        await usuario.save();
 
         Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
 
@@ -135,7 +139,7 @@ exports.mostrarTablero =  async (req,res) =>{
         }
 
         partida.estatus = 2;
-        partida.save()
+        await partida.save()
         req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
         
         Request.crearRequest('mostrarTablero',JSON.stringify(req.body),200);
@@ -153,46 +157,98 @@ exports.mostrarTablero =  async (req,res) =>{
     }
 }
 
-// exports.desconectarUsuarioPartida = async (req,res) =>{
-//     let nNumeroError = 500;
-//     try{
-//         if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
-//             throw "El usuario no tiene derecho a utilizar este metodo"
-//         }
+exports.desconectarUsuarioPartida = async (req,res) =>{
+    let nNumeroError = 500;
+    try{
+        console.log('entre')
+        // if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
+        //     throw "El usuario no tiene derecho a utilizar este metodo"
+        // }
         
-//         let partida = await Partida.findOne({numeroPartida:req.params.numeroPartida})
-//         if(!partida){
-//             nNumeroError = 503;
-//             throw 'No se encontro la partida'
-//         }
+        // let partida = await Partida.findOne({numeroPartida:req.params.numeroPartida})
+        // if(!partida){
+        //     nNumeroError = 503;
+        //     throw 'No se encontro la partida'
+        // }
 
-//         //Se arma segmento para el lado del usuario
-//         const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
+        // //Se arma segmento para el lado del usuario
+        // const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
 
-//         await Partida.updateOne(
-//             { _id:  req.params.numeroPartida },
-//             {
-//               $pull: { 'jugadores._id': mongoose.Types.ObjectId(usuario._id) },
-//             }
-//         );
-//         partida = await Partida.findOne({numeroPartida:req.params.numeroPartida})
-//         console.log('pase e')
-//         enviarMensajeLobby(partida);
+        // await Partida.updateOne(
+        //     { _id:  req.params.numeroPartida },
+        //     {
+        //       $pull: { 'jugadores._id': mongoose.Types.ObjectId(usuario._id) },
+        //     }
+        // );
+        // partida = await Partida.findOne({numeroPartida:req.params.numeroPartida})
+        // console.log('pase e')
+        // enviarMensajeLobby(partida);
         
-//         Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
+        // Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
 
-//         return res.json({
-//             message: 'Partida encontrada.',
-//             data:partida.numeroPartida
-//         });
-//     }catch(error){
-//         Request.crearRequest('buscarPartida',JSON.stringify(req.body),nNumeroError,error);
-//         res.status(nNumeroError).json({
-//             error: 'Algo salio mal',
-//             data: error.toString()
-//         });
-//     }
-// }
+        return res.json({
+            message: 'Partida encontrada.',
+            data:"partida.numeroPartida"
+        });
+    }catch(error){
+        Request.crearRequest('buscarPartida',JSON.stringify(req.body),nNumeroError,error);
+        res.status(nNumeroError).json({
+            error: 'Algo salio mal',
+            data: error.toString()
+        });
+    }
+}
+
+exports.salirPartida = async (req,res) =>{
+    let nNumeroError = 500;
+    try{
+        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
+            throw "El usuario no tiene derecho a utilizar este metodo"
+        }
+        
+        let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+        if(!partida){
+            nNumeroError = 503;
+            throw 'No se encontro la partida'
+        }
+        //actualizamos al usuario para que la partida actual sea null
+        const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
+        usuario.numeroPartidaActual = null;
+        await usuario.save();
+
+        await Partida.updateOne(
+            { numeroPartida: req.body.numeroPartida},
+            {
+              $pull: { 'jugadores': {_id:mongoose.Types.ObjectId(usuario._id) }},
+            }
+        );
+        if(partida.jugadores.length === 1 || partida.usuario_id.toString() === usuario._id.toString()){
+            //matamos la partida para todos los jugadores en caso de que solo quede un jugador o el creado salga de la partida
+            partida.estatus = 5
+            await partida.save()
+        }
+        partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+        partida = convertirMongoAJson(partida);
+        if(partida.usuario_id.toString() === usuario._id.toString()){
+            partida.alfitrion = true;
+            partida.nombreUsuario = usuario.usuario;
+        }
+
+        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
+        Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
+        return res.json({
+            message: 'Partida encontrada.',
+            data:"usuario eliminado"
+        });
+    }catch(error){
+        Request.crearRequest('buscarPartida',JSON.stringify(req.body),nNumeroError,error);
+        res.status(nNumeroError).json({
+            error: 'Algo salio mal',
+            data: error.toString()
+        });
+    }
+}
+
 
 exports.agregarPiezasTablero =  async (req,res) =>{
     let nNumeroError = 500;
@@ -224,7 +280,7 @@ exports.agregarPiezasTablero =  async (req,res) =>{
         if(partida.jugadores.filter(x => x.listo === true).length === partida.cantidadJugadores){
             partida.estatus = 3;
             partida.fechaTurno = Date.now();
-            partida.save()
+            await partida.save()
         }else{
             const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
             partida = convertirMongoAJson(partida)
@@ -304,6 +360,17 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
                     }
                 }
             );
+
+             await Usuario.updateMany(
+                {
+                    numeroPartidaActual:req.body.numeroPartida
+                }, 
+                { 
+                    $set: { 
+                        numeroPartidaActual : null
+                    },
+                }
+            );
         }
         partida = convertirMongoAJson(partida)
         partida.posicionPiezasGlobal = req.body.posicionPiezasGlobal;
@@ -326,37 +393,9 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
     }
 }
 
-exports.desconectarJugador = async(partidaT) =>{
-    try{
-    // if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
-    //     throw "El usuario no tiene derecho a utilizar este metodo"
-    // }
-
-    let partida = await Partida.findOne({numeroPartida:partidaT.numeroPartida})
-    if(!partida){
-        nNumeroError = 503;
-        throw 'No se encontro la partida'
-    }
-    console.log('entre')
-    // await Partida.updateOne(
-    //     {
-    //         numeroPartida:partidaT.numeroPartida,
-    //         'jugadores._id':new mongoose.Types.ObjectId(Buffer.from(req.headers.authorization, 'base64').toString('ascii'))
-    //     }, 
-    //     { 
-    //         $set: { 
-    //             "jugadores.$.conectado" : false
-    //         }
-    //     }
-    // );
-    }catch(error){
-        console.log(error)
-    }
-}
-
 const validaPartidaExistente = async(numeroPartida) =>{
     try{
-        const partida = await Partida.findOne({numeroPartida:numeroPartida,estatus:{$ne:3}});
+        const partida = await Partida.findOne({numeroPartida:numeroPartida,estatus:{$nin:[4,5]}});
         if(!partida) {
             return false;
         }
