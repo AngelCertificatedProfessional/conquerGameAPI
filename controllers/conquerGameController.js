@@ -326,6 +326,34 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
     }
 }
 
+exports.desconectarJugador = async(partidaT) =>{
+    try{
+    // if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
+    //     throw "El usuario no tiene derecho a utilizar este metodo"
+    // }
+
+    let partida = await Partida.findOne({numeroPartida:partidaT.numeroPartida})
+    if(!partida){
+        nNumeroError = 503;
+        throw 'No se encontro la partida'
+    }
+    console.log('entre')
+    // await Partida.updateOne(
+    //     {
+    //         numeroPartida:partidaT.numeroPartida,
+    //         'jugadores._id':new mongoose.Types.ObjectId(Buffer.from(req.headers.authorization, 'base64').toString('ascii'))
+    //     }, 
+    //     { 
+    //         $set: { 
+    //             "jugadores.$.conectado" : false
+    //         }
+    //     }
+    // );
+    }catch(error){
+        console.log(error)
+    }
+}
+
 const validaPartidaExistente = async(numeroPartida) =>{
     try{
         const partida = await Partida.findOne({numeroPartida:numeroPartida,estatus:{$ne:3}});

@@ -1,3 +1,5 @@
+const { desconectarJugador } = require("../controllers/conquerGameController")
+
 // let  socketN;
 const socketController = (socket) => {
     console.log('jugador conectado',socket.id)
@@ -6,14 +8,9 @@ const socketController = (socket) => {
         console.log('Cliente desconectado',socket.id)
     })
 
-    // socket.on('enviar-mensaje',(payload) => {
-    //     let vResultado = {};
-    //     vResultado.estatus = 6
-    //     vResultado.numeroPartida = payload.numeroPartida;
-    //     socket.emit('partida'+vResultado.numeroPartida,vResultado)
-    //     socket.broadcast.emit('partida'+vResultado.numeroPartida,vResultado)
-    // })
-
+    socket.on('juego-desconectado',(payload) => {
+        desconectarJugador(payload)
+    })
 }
 
 module.exports = {
