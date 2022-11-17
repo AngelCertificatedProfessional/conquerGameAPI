@@ -5,10 +5,22 @@ const Partida = require('../models/Partida')
 const mongoose = require('mongoose')
 const { convertirMongoAJson } = require('../utils/utils')
 exports.crearPartida =  async (req,res) =>{
+    let nNumeroError = 500;
+    let numeroPartida = 0
     try{
         
         if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
             throw "El usuario no tiene derecho a utilizar este metodo"
+        }
+        let eliminarPartidaActual = req.body.eliminarUsuarioPartidaActual || false;
+        //Se arma segmento para el lado del usuario
+        const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
+        if(!eliminarPartidaActual && usuario.numeroPartidaActual !== undefined && usuario.numeroPartidaActual !== null){
+            if(validaPartidaExistente(usuario.numeroPartidaActual)){
+                numeroPartida = usuario.numeroPartidaActual
+                nNumeroError = 530;
+                throw `Ya tienes una partida en curso, ${usuario.numeroPartidaActual}`    
+            }
         }
 
         const vResultado = {}
@@ -20,9 +32,6 @@ exports.crearPartida =  async (req,res) =>{
                 bCumple = false;
             }
         }
-        //Se arma segmento para el lado del usuario
-        const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
-
         //Se arma segmento para el lado de la partida
         const partida = new Partida()
         partida.numeroPartida = vResultado.random;
@@ -42,11 +51,22 @@ exports.crearPartida =  async (req,res) =>{
             data:vResultado
         });
     }catch(error){
-        Request.crearRequest('crearPartida',JSON.stringify(req.body),500,error);
-        res.status(500).json({
-            error: 'Algo salio mal',
-            data: error.toString()
-        });
+        Request.crearRequest('crearPartida',JSON.stringify(req.body),nNumeroError,error);
+        if(nNumeroError === 530){
+            let vResultadoE = {}
+            vResultadoE.numeroPartida = numeroPartida;
+            vResultadoE.existe = true;
+            res.json({
+                message: 'La partida ya existe',
+                data:vResultadoE
+            });
+        }else{
+            res.status(nNumeroError).json({
+                error: 'Algo salio mal',
+                data: error.toString(),
+            });
+        }
+        
     }
 }
 
