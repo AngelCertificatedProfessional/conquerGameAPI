@@ -35,6 +35,10 @@ const UsuarioSchema = mongoose.Schema({
     numeroPartidaActual:{
         type:Number,
         required: false,
+    },
+    aceptoTerminosYCondiciones:{
+        type:Boolean,
+        required: true,
     }
 })
 
