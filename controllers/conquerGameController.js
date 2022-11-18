@@ -72,26 +72,38 @@ exports.crearPartida =  async (req,res) =>{
 
 exports.buscarPartida =  async (req,res) =>{
     let nNumeroError = 500;
+    let numeroPartidaAc = 0
     try{
         if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
             throw "El usuario no tiene derecho a utilizar este metodo"
         }
-        const partida = await Partida.findOne({numeroPartida:req.params.numeroPartida})
+        const partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
         if(!partida){
             nNumeroError = 503;
             throw 'No se encontro la partida'
         }
-        
+        //Se arma segmento para el lado del usuario
+        const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
+        //Se valida que el usuario no este en otra partida
+        let eliminarPartidaActual = req.body.eliminarUsuarioPartidaActual || false;
+        if(!eliminarPartidaActual && usuario.numeroPartidaActual !== undefined && usuario.numeroPartidaActual !== null){
+            if(validaPartidaExistente(usuario.numeroPartidaActual)){
+                numeroPartidaAc = usuario.numeroPartidaActual
+                nNumeroError = 530;
+                throw `Ya tienes una partida en curso, ${usuario.numeroPartidaActual}`    
+            }
+        }
+
         if(partida.jugadores.length >= partida.cantidadJugadores ){
             throw 'Esta sala ya cuenta con la capacidad maxima de jugadores'
         }
 
-        //Se arma segmento para el lado del usuario
-        const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
+
+
         partida.jugadores.push(usuario);
         await partida.save();
 
-        usuario.numeroPartidaActual = req.params.numeroPartida;
+        usuario.numeroPartidaActual = req.body.numeroPartida;
         await usuario.save();
 
         Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
@@ -102,10 +114,20 @@ exports.buscarPartida =  async (req,res) =>{
         });
     }catch(error){
         Request.crearRequest('buscarPartida',JSON.stringify(req.body),nNumeroError,error);
-        res.status(nNumeroError).json({
-            error: 'Algo salio mal',
-            data: error.toString()
-        });
+        if(nNumeroError === 530){
+            let vResultadoE = {}
+            vResultadoE.numeroPartida = numeroPartidaAc;
+            vResultadoE.existe = true;
+            res.json({
+                message: 'La partida ya existe',
+                data:vResultadoE
+            });
+        }else{
+            res.status(nNumeroError).json({
+                error: 'Algo salio mal',
+                data: error.toString()
+            });
+        }
     }
 }
 
