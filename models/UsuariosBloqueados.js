@@ -5,6 +5,10 @@ const UsuariosBloqueadosSchema = mongoose.Schema({
         type:String,
         required: [true,'El nombre es obligatorio'],
         unique: true
+    },
+    ignorarInclude:{
+        type:Boolean,
+        required: false
     }
 })
 

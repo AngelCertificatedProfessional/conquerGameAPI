@@ -3,15 +3,10 @@ const Request = require('./requestController')
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs');
 const UsuariosBloqueados = require('../models/UsuariosBloqueados');
+const { convertirMongoAJson } = require('../utils/utils');
 
 exports.createUsuario =  async (req,res) =>{
     try{
-        /*
-        if(!await validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
-        */
-
         await validaUsuario(req.body.usuario,null,req.body.correo)
 
         const usuario = new Usuario(req.body)
@@ -39,30 +34,31 @@ exports.createUsuario =  async (req,res) =>{
 //Validaremos que el usuario no pueda registrarse repetidas veces como tambien que no utilize nombres inpropios
 const validaUsuario = async (usuario,nId,correo) => {
     if(nId === undefined || nId === null){
-        let nCantidadRegistros = await Usuario.countDocuments({$or:[{'usuario':{'$regex':usuario,"$options" : "i"}},{'correo':{'$regex':correo,"$options" : "i"}}]});
-        console.log(nCantidadRegistros)
+        const usuarioT = "^"+usuario+"$"
+        const correoT = "^"+correo+"$"
+        let nCantidadRegistros = await Usuario.countDocuments({$or:[{'usuario':{'$regex':usuarioT,"$options" : "i"}},{'correo':{'$regex':correoT,"$options" : "i"}}]});
         if(nCantidadRegistros >= 1){
             throw 'El usuario o el correo ya existe'
         }
 
         let usuariosBloqueados = await UsuariosBloqueados.find({});
-
+        usuariosBloqueados = convertirMongoAJson(usuariosBloqueados)
         let nValor = usuariosBloqueados.findIndex(obj => 
             (obj.usuario).toUpperCase()===usuario.toUpperCase() || 
+            (obj.usuario).toUpperCase()===usuario.toUpperCase().replace('1','I') || 
+            (obj.usuario).toUpperCase()===usuario.toUpperCase().replace('3','E') || 
+            (obj.usuario).toUpperCase()===usuario.toUpperCase().replace('@','A') || 
+            (obj.usuario).toUpperCase()===usuario.toUpperCase().replace('0','O') || 
             (obj.usuario).toUpperCase().replace(' ','') === usuario.toUpperCase() ||
             (obj.usuario).toUpperCase().replace(' ','_') === usuario.toUpperCase() || 
-            usuario.toUpperCase().includes((obj.usuario).toUpperCase()));
-
+            (usuario.toUpperCase().includes((obj.usuario).toUpperCase()) && (obj.ignorarInclude === undefined || !obj.ignorarInclude)) ||
+            (usuario.toUpperCase().replace('1','I').includes((obj.usuario).toUpperCase()) && (obj.ignorarInclude === undefined || !obj.ignorarInclude)) ||
+            (usuario.toUpperCase().replace('3','E').includes((obj.usuario).toUpperCase()) && (obj.ignorarInclude === undefined || !obj.ignorarInclude)) ||
+            (usuario.toUpperCase().replace('@','A').includes((obj.usuario).toUpperCase()) && (obj.ignorarInclude === undefined || !obj.ignorarInclude)) ||
+            (usuario.toUpperCase().replace('0','O').includes((obj.usuario).toUpperCase()) && (obj.ignorarInclude === undefined || !obj.ignorarInclude)));
         if(nValor !== -1){
             throw `El usuario ${usuario} no puede ser creado en nuestro sistema por su nombre, favor de cambiarlo por favor` 
         }
-
-        console.log(usuariosBloqueados)
-        throw 'error voluntario'
-        // nCantidadRegistros = await UsuariosBloqueados.countDocuments({$or:[{'usuario':usuario}]})
-        // if(nCantidadRegistros >= 0){
-        //     
-        // }
     }else{
         let nCantidadRegistros = await Usuario.countDocuments({'usuario':usuario,'_id':{'$ne':nId}})
         if(nCantidadRegistros >= 1){
