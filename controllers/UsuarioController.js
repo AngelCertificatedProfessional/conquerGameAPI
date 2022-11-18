@@ -2,6 +2,7 @@ const Usuario = require('../models/Usuario')
 const Request = require('./requestController')
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs');
+const UsuariosBloqueados = require('../models/UsuariosBloqueados');
 
 exports.createUsuario =  async (req,res) =>{
     try{
@@ -11,9 +12,8 @@ exports.createUsuario =  async (req,res) =>{
         }
         */
 
-        if((await validaUsuario(req.body.usuario,null,req.body.correo)) > 0) {
-            throw 'El usuario o el correo ya existe'
-        }
+        await validaUsuario(req.body.usuario,null,req.body.correo)
+
         const usuario = new Usuario(req.body)
 
         const salt = bcrypt.genSaltSync();
@@ -36,16 +36,44 @@ exports.createUsuario =  async (req,res) =>{
     }
 }
 
+//Validaremos que el usuario no pueda registrarse repetidas veces como tambien que no utilize nombres inpropios
 const validaUsuario = async (usuario,nId,correo) => {
     if(nId === undefined || nId === null){
-        return (await Usuario.countDocuments({$or:[{'usuario':usuario},{'correo':correo}]}));
+        let nCantidadRegistros = await Usuario.countDocuments({$or:[{'usuario':{'$regex':usuario,"$options" : "i"}},{'correo':{'$regex':correo,"$options" : "i"}}]});
+        console.log(nCantidadRegistros)
+        if(nCantidadRegistros >= 1){
+            throw 'El usuario o el correo ya existe'
+        }
+
+        let usuariosBloqueados = await UsuariosBloqueados.find({});
+
+        let nValor = usuariosBloqueados.findIndex(obj => 
+            (obj.usuario).toUpperCase()===usuario.toUpperCase() || 
+            (obj.usuario).toUpperCase().replace(' ','') === usuario.toUpperCase() ||
+            (obj.usuario).toUpperCase().replace(' ','_') === usuario.toUpperCase() || 
+            usuario.toUpperCase().includes((obj.usuario).toUpperCase()));
+
+        if(nValor !== -1){
+            throw `El usuario ${usuario} no puede ser creado en nuestro sistema por su nombre, favor de cambiarlo por favor` 
+        }
+
+        console.log(usuariosBloqueados)
+        throw 'error voluntario'
+        // nCantidadRegistros = await UsuariosBloqueados.countDocuments({$or:[{'usuario':usuario}]})
+        // if(nCantidadRegistros >= 0){
+        //     
+        // }
     }else{
-        return (await Usuario.countDocuments({'usuario':usuario,'_id':{'$ne':nId}}));
+        let nCantidadRegistros = await Usuario.countDocuments({'usuario':usuario,'_id':{'$ne':nId}})
+        if(nCantidadRegistros >= 1){
+            throw 'El usuario o el correo ya existe'
+        }
     }
 }
 
 exports.iniciarSecion = async(req,res) => {
     try{
+        
         let usuario = await Usuario.findOne({'correo':req.body.correo},{usuario:1,contrasena:1,_id:1,rol:1});
         if(!usuario) {
             throw 'El usuario es incorrecto';

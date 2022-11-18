@@ -1,5 +1,3 @@
-const { desconectarJugador } = require("../controllers/conquerGameController")
-
 // let  socketN;
 const socketController = (socket) => {
     console.log('Jugador conectado',socket.id)
