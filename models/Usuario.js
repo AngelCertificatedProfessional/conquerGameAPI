@@ -39,6 +39,10 @@ const UsuarioSchema = mongoose.Schema({
     aceptoTerminosYCondiciones:{
         type:Boolean,
         required: true,
+    },
+    activa:{
+        type:Boolean,
+        required: true,
     }
 })
 

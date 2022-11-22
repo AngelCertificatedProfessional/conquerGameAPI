@@ -14,6 +14,7 @@ exports.createUsuario =  async (req,res) =>{
         const salt = bcrypt.genSaltSync();
         usuario.contrasena = bcrypt.hashSync(usuario.contrasena,salt);
         usuario.rol = 2;
+        usuario.activa = false;
         const resultado = await usuario.save();
 
         Request.crearRequest('createUsuario',JSON.stringify(req.body),200);
@@ -73,6 +74,9 @@ exports.iniciarSecion = async(req,res) => {
         let usuario = await Usuario.findOne({'correo':req.body.correo},{usuario:1,contrasena:1,_id:1,rol:1});
         if(!usuario) {
             throw 'El usuario es incorrecto';
+        }
+        if(usuario.activa === undefined || !usuario.activa) {
+            throw 'El usuario no tiene todavia los derechos para entrar al sistema';
         }
         usuario = JSON.parse(JSON.stringify(usuario));
         usuario.token = Buffer.from(usuario._id.toString()).toString('base64');
