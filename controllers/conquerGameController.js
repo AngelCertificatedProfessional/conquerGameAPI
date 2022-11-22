@@ -82,8 +82,17 @@ exports.buscarPartida =  async (req,res) =>{
             nNumeroError = 503;
             throw 'No se encontro la partida'
         }
+        
         //Se arma segmento para el lado del usuario
         const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
+        //si el usuario ya pertenece a esta partida le regresamos la informacion
+        if(parseInt(req.body.numeroPartida) === usuario.numeroPartidaActual){
+            return res.json({
+                message: 'Partida encontrada.',
+                data:partida.jugadores
+            });
+        }
+
         //Se valida que el usuario no este en otra partida
         let eliminarPartidaActual = req.body.eliminarUsuarioPartidaActual || false;
         if(!eliminarPartidaActual && usuario.numeroPartidaActual !== undefined && usuario.numeroPartidaActual !== null){
@@ -97,8 +106,6 @@ exports.buscarPartida =  async (req,res) =>{
         if(partida.jugadores.length >= partida.cantidadJugadores ){
             throw 'Esta sala ya cuenta con la capacidad maxima de jugadores'
         }
-
-
 
         partida.jugadores.push(usuario);
         await partida.save();
@@ -160,6 +167,37 @@ exports.buscarEstatusPartida =  async (req,res) =>{
         });
     }
 }
+
+exports.buscarPartidas =  async (req,res) =>{
+    let nNumeroError = 500;
+    try{
+        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
+            throw "El usuario no tiene derecho a utilizar este metodo"
+        }
+        
+        const partida = await Partida.find({estatus:1})
+        if(!partida){
+            nNumeroError = 503;
+            throw 'No se encontro la partida'
+        }
+
+        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
+        
+        Request.crearRequest('buscarPartidas',JSON.stringify(req.body),200);
+
+        return res.json({
+            message: 'Partidas.',
+            data:partida
+        });
+    }catch(error){
+        Request.crearRequest('buscarPartidas',JSON.stringify(req.body),nNumeroError,error);
+        res.status(nNumeroError).json({
+            error: 'Algo salio mal',
+            data: error.toString()
+        });
+    }
+}
+
 
 exports.mostrarTablero =  async (req,res) =>{
     let nNumeroError = 500;

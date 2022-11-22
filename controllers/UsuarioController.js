@@ -71,7 +71,7 @@ const validaUsuario = async (usuario,nId,correo) => {
 exports.iniciarSecion = async(req,res) => {
     try{
         
-        let usuario = await Usuario.findOne({'correo':req.body.correo},{usuario:1,contrasena:1,_id:1,rol:1});
+        let usuario = await Usuario.findOne({'correo':req.body.correo},{usuario:1,contrasena:1,_id:1,rol:1,activa:1});
         if(!usuario) {
             throw 'El usuario es incorrecto';
         }
