@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const UsuariosBloqueados = require('../models/UsuariosBloqueados');
 const { convertirMongoAJson } = require('../utils/utils');
 
-exports.createUsuario =  async (req,res) =>{
+exports.agregarUsuarioLocal =  async (req,res) =>{
     try{
         await validaUsuario(req.body.usuario,null,req.body.correo)
 
@@ -17,14 +17,57 @@ exports.createUsuario =  async (req,res) =>{
         usuario.activa = false;
         const resultado = await usuario.save();
 
-        Request.crearRequest('createUsuario',JSON.stringify(req.body),200);
+        Request.crearRequest('agregarUsuarioLocal',JSON.stringify(req.body),200);
 
         return res.json({
             message: 'El usuario fue creado exitosamente',
             data:resultado
         });
     }catch(error){
-        Request.crearRequest('createUsuario',JSON.stringify(req.body),500,error.toString());
+        Request.crearRequest('agregarUsuarioLocal',JSON.stringify(req.body),500,error.toString());
+        res.status(500).json({
+            error: 'Algo salio mal',
+            data: error.toString()
+        });
+    }
+}
+
+exports.agregarUsuarioInvitado =  async (req,res) =>{
+    try{
+
+        const vResultado = {}
+
+        let bCumple = true;
+        while(bCumple){
+            vResultado.random = Math.floor(Math.random() * (10000 - 1000) + 1000);
+            let usuarioInvitado = 'invitado'+vResultado.random
+            let correoInvitado = 'invitado'+vResultado.random
+            if(!(await validaUsuario(usuarioInvitado,null,correoInvitado)) > 0) {
+                bCumple = false;
+            }
+        }
+        const usuario = new Usuario()
+        usuario.correo = 'invitado'+vResultado.random
+        usuario.usuario = 'invitado'+vResultado.random
+        usuario.contrasena = 'invitado'+vResultado.random
+        usuario.nombre = 'invitado'+vResultado.random;
+        usuario.apellido = 'invitado'+vResultado.random;
+        usuario.aceptoTerminosYCondiciones = true;
+        usuario.invitado = true;
+        const salt = bcrypt.genSaltSync();
+        usuario.contrasena = bcrypt.hashSync(usuario.contrasena,salt);
+        usuario.rol = 2;
+        usuario.activa = true;
+        const resultado = await usuario.save();
+        resultado.contrasena = 'invitado'+vResultado.random
+        Request.crearRequest('generarUsuarioInvitado',JSON.stringify(req.body),200);
+
+        return res.json({
+            message: 'El usuario fue creado exitosamente',
+            data:resultado
+        });
+    }catch(error){
+        Request.crearRequest('generarUsuarioInvitado',JSON.stringify(req.body),500,error.toString());
         res.status(500).json({
             error: 'Algo salio mal',
             data: error.toString()

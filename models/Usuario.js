@@ -43,9 +43,20 @@ const UsuarioSchema = mongoose.Schema({
     activa:{
         type:Boolean,
         required: true,
+    },
+    invitado:{
+        type:Boolean,
+        required: true,
+        default:false
     }
 })
 
 UsuarioSchema.index({usuario:'text'})
-
+UsuarioSchema.index({creado: 1},{
+    expireAfterSeconds: 86400, //1 Dia
+    partialFilterExpression: {
+        invitado: true
+    }
+}
+);
 module.exports = mongoose.model('Usuario',UsuarioSchema,'usuario')
