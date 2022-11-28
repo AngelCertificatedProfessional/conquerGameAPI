@@ -357,9 +357,16 @@ exports.agregarPiezasTablero =  async (req,res) =>{
         );
 
         partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+        //en este segmento se verifica si todos los usuarios seleccionaron la opcion de aceptar o no
+        //en caso de que si se inicia la partida caso contrario se notifica a los usuarios que un usuario esta listo
         if(partida.jugadores.filter(x => x.listo === true).length === partida.cantidadJugadores){
             partida.estatus = 3;
             partida.fechaTurno = Date.now();
+            //se realiza un ciclo para generar la key de posicionPiezasGlobales
+            partida.posicionPiezasGlobal = {}
+            for(let i=0;i<partida.jugadores.length;i++){
+                Object.assign(partida.posicionPiezasGlobal,partida.jugadores[i].posicionPiezasJugador)
+            }
             await partida.save()
         }else{
             const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
