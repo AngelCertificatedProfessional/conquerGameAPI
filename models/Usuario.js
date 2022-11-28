@@ -46,7 +46,6 @@ const UsuarioSchema = mongoose.Schema({
     },
     invitado:{
         type:Boolean,
-        required: true,
         default:false
     }
 })
