@@ -9,6 +9,7 @@ exports.crearPartida =  async (req,res) =>{
     let numeroPartida = 0
     try{
         
+        
         if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
             throw "El usuario no tiene derecho a utilizar este metodo"
         }
