@@ -114,7 +114,7 @@ const validaUsuario = async (usuario,nId,correo) => {
 exports.iniciarSecion = async(req,res) => {
     try{
         
-        let usuario = await Usuario.findOne({'correo':req.body.correo},{usuario:1,contrasena:1,_id:1,rol:1,activa:1});
+        let usuario = await Usuario.findOne({'correo':req.body.correo},{usuario:1,contrasena:1,_id:1,rol:1,activa:1,invitado:1});
         if(!usuario) {
             throw 'El usuario es incorrecto';
         }
@@ -151,5 +151,55 @@ const validaSesionUsuario = exports.validaSesionUsuario = async(_id) =>{
         return true;
     }catch(error){
         return false;
+    }
+}
+
+exports.getUsuariobyId = async (req,res) => {
+    try{
+        if(!await validaSesionUsuario(req.headers.authorization)){
+            throw "El usuario no tiene derecho a utilizar este metodo"
+        }
+        const resultado = await Usuario.findOne({'_id':Buffer.from(req.params._id, 'base64').toString('ascii') },{});
+        Request.crearRequest('getUsuariobyId',JSON.stringify(req.params._id),200);
+        return res.json({
+            message: 'Envio de usuario',
+            data:resultado
+        });
+    }catch(error){
+        Request.crearRequest('getUsuariobyId',JSON.stringify(req.params._id),500,error);
+        res.status(500).json({
+            error: 'Algo salio mal',
+            data: error
+        });
+    }
+}
+
+
+exports.actualizarUsuario = async (req,res) => {
+    try{
+        if(!await validaSesionUsuario(req.headers.authorization)){
+            throw "El usuario no tiene derecho a utilizar este metodo"
+        }
+        if((await validaUsuario(req.body.usuario,req.body._id)) > 0) {
+            throw 'El usuario ya existe'
+        }
+        const usuario = await Usuario.findOne({'_id':req.body._id});
+        usuario.usuario = req.body.usuario;
+        usuario.nombre = req.body.nombre;
+        usuario.apellido = req.body.apellido;
+        usuario.tipoUsuario = req.body.tipoUsuario;
+        const resultado = await usuario.save();
+        Request.crearRequest('actualizarUsuario',JSON.stringify(req.body),200);
+        return res.json({
+            message: 'Envio de usuario',
+            data:resultado
+        });
+    }catch(error){
+        console.log(error)
+        Request.crearRequest('actualizarUsuario',JSON.stringify(req.body),500,error);
+        res.status(500).json({
+            error: 'Algo salio mal',
+            data: error
+        });
     }
 }
