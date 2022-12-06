@@ -146,7 +146,8 @@ exports.buscarEstatusPartida =  async (req,res) =>{
             throw "El usuario no tiene derecho a utilizar este metodo"
         }
         
-        const partida = await Partida.findOne({numeroPartida:req.params.numeroPartida})
+        const partida = await Partida.findOne({numeroPartida:req.params.numeroPartida},{ _id:1,jugadores:1,creadoEl:1,numeroPartida:1,usuario_id:1,
+            cantidadJugadores:1,tipoJuego:1,juego:1,estatus:1,fechaTurno:1,posicionPiezasGlobal:1,cantidadTurnosPartida:1,turno:1,ganador:1,historialJugadores: {$slice: -10}})
         if(!partida){
             nNumeroError = 503;
             throw 'No se encontro la partida'
@@ -403,12 +404,12 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
             throw "El usuario no tiene derecho a utilizar este metodo"
         }
         
-        let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+        let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida},{ _id:1,jugadores:1,creadoEl:1,numeroPartida:1,usuario_id:1,
+            cantidadJugadores:1,tipoJuego:1,juego:1,estatus:1,fechaTurno:1,posicionPiezasGlobal:1,cantidadTurnosPartida:1,turno:1,ganador:1,historialJugadores: {$slice: -10}})
         if(!partida){
             nNumeroError = 503;
             throw 'No se encontro la partida'
         }
-
         //evaluamos si los jugadores todavia poseen sus cuatro reyes
         let arrResultado = Object.keys(req.body.posicionPiezasGlobal).filter(key => key.includes('rey') && req.body.posicionPiezasGlobal[key] !== '')
         
@@ -418,20 +419,29 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
         if(req.body.hasOwnProperty('turno')){
             vActualizar.$set.turno = req.body.turno
         }
+        vActualizar.$push = {}
+        vActualizar.$push.historialJugadores= req.body.accionUsuario ;
         if(Object.keys(arrResultado).length == 1){
             vActualizar.$set.estatus = 4
-            vActualizar.$set.ganador = arrResultado[0][0]
+            vActualizar.$set.ganador = arrResultado[0][0];
+            const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
+            vActualizar.$push = {}
+            vActualizar.$push.historialJugadores = "Victoria del jugador "+usuario.usuario;
         }else{
             vActualizar.$set.fechaTurno = Date.now()
         }
+        
         vActualizar.$inc = {}
         vActualizar.$inc.cantidadTurnosPartida = 1
+
         await Partida.updateOne(
             {
                 numeroPartida:req.body.numeroPartida
             }, 
             vActualizar
         );
+        partida = await Partida.findOne({numeroPartida:req.body.numeroPartida},{ _id:1,jugadores:1,creadoEl:1,numeroPartida:1,usuario_id:1,
+            cantidadJugadores:1,tipoJuego:1,juego:1,estatus:1,fechaTurno:1,posicionPiezasGlobal:1,cantidadTurnosPartida:1,turno:1,ganador:1,historialJugadores: {$slice: -10}})
         partida = convertirMongoAJson(partida)
         //victorio de algun jugador
         if(Object.keys(arrResultado).length == 1){
@@ -461,6 +471,7 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
             data:partida.numeroPartida
         });
     }catch(error){
+        console.log(error)
         Request.crearRequest('actualizarPiezasPosicionJuego',JSON.stringify(req.body),nNumeroError,error);
         res.status(nNumeroError).json({
             error: 'Algo salio mal',

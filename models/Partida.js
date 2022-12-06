@@ -58,6 +58,10 @@ const PartidaSchema = mongoose.Schema({
     cantidadTurnosPartida:{
         type:Number,
         required:false
+    },
+    historialJugadores:{
+        type:Array,
+        required:false
     }
 })
 PartidaSchema.index({creadoEl: 1},{expireAfterSeconds: 604800});
