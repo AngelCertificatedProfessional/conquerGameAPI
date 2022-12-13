@@ -229,3 +229,31 @@ exports.actualizarContrasena = async (req,res) => {
         });
     }
 }
+
+exports.buscar10Mejores =  async (req,res) =>{
+    let nNumeroError = 500;
+    try{
+        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
+            throw "El usuario no tiene derecho a utilizar este metodo"
+        }
+        
+        const usuario = await Usuario.find({}).sort({"puntuaje":1}).limit(10)
+        if(!partida){
+            nNumeroError = 503;
+            throw 'No se encontro la partida'
+        }
+        
+        Request.crearRequest('buscar10Mejores',JSON.stringify(req.body),200);
+
+        return res.json({
+            message: 'Partidas.',
+            data:partida
+        });
+    }catch(error){
+        Request.crearRequest('buscar10Mejores',JSON.stringify(req.body),nNumeroError,error);
+        res.status(nNumeroError).json({
+            error: 'Algo salio mal',
+            data: error.toString()
+        });
+    }
+}

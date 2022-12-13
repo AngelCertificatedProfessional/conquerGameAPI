@@ -47,6 +47,10 @@ const UsuarioSchema = mongoose.Schema({
     invitado:{
         type:Boolean,
         default:false
+    },
+    puntuaje:{
+        type:Number,
+        default:false
     }
 })
 

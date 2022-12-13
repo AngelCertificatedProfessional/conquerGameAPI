@@ -421,6 +421,16 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
         }
         vActualizar.$push = {}
         vActualizar.$push.historialJugadores= req.body.accionUsuario ;
+        await Usuario.updateOne(
+            {
+                _id:Buffer.from(req.headers.authorization, 'base64').toString('ascii')
+            }, 
+            {
+                $inc:{
+                    "puntuaje":req.body.puntuaje
+                }
+            }
+        );
         if(Object.keys(arrResultado).length == 1){
             vActualizar.$set.estatus = 4
             vActualizar.$set.ganador = arrResultado[0][0];
@@ -429,6 +439,7 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
             vActualizar.$push.historialJugadores = "Victoria del jugador "+usuario.usuario;
         }else{
             vActualizar.$set.fechaTurno = Date.now()
+            
         }
         
         vActualizar.$inc = {}
