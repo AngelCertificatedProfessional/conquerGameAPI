@@ -473,6 +473,8 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
         partida.posicionPiezasGlobal = req.body.posicionPiezasGlobal;
         partida.fechaTurno = Date.now();
         partida.turno = req.body.turno;
+        partida.jugadorPiezaEliminada = req.body.jugadorPiezaEliminada
+        partida.jugadorEliminoPieza = req.body.jugadorEliminoPieza
         req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);    
         
         Request.crearRequest('actualizarPiezasPosicionJuego',JSON.stringify(req.body),200);
