@@ -121,7 +121,7 @@ exports.iniciarSecion = async(req,res) => {
         if(usuario.activa === undefined || !usuario.activa) {
             throw 'El usuario no tiene todavia los derechos para entrar al sistema';
         }
-        usuario = JSON.parse(JSON.stringify(usuario));
+        usuario = convertirMongoAJson(usuario);
         usuario.token = Buffer.from(usuario._id.toString()).toString('base64');
         if(!bcrypt.compareSync(req.body.contrasena, usuario.contrasena)){
             throw 'El usuario o la contrasena son incorrectas';    
@@ -189,11 +189,20 @@ exports.actualizarUsuario = async (req,res) => {
         usuario.correo = req.body.correo;
         usuario.nombre = req.body.nombre;
         usuario.apellido = req.body.apellido;
-        const resultado = await usuario.save();
+        await usuario.save();
+
+        const vResultado = {}
+        vResultado.token = Buffer.from(usuario._id.toString()).toString('base64');
+        vResultado.usuario = usuario.usuario
+        vResultado.rol = usuario.rol  
+        vResultado.activa = usuario.activa 
+        vResultado.invitado = usuario.invitado 
+        vResultado.meme = usuario.meme 
+
         Request.crearRequest('actualizarUsuario',JSON.stringify(req.body),200);
         return res.json({
             message: 'Envio de usuario',
-            data:resultado
+            data:Buffer.from(JSON.stringify(vResultado)).toString('base64')
         });
     }catch(error){
         console.log(error)
