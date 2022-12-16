@@ -1,6 +1,5 @@
 const Usuario = require('../models/Usuario')
 const Request = require('./requestController')
-const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs');
 const UsuariosBloqueados = require('../models/UsuariosBloqueados');
 const { convertirMongoAJson } = require('../utils/utils');
