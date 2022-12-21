@@ -504,3 +504,42 @@ const validaPartidaExistente = async(numeroPartida) =>{
         return false;
     }
 }
+
+exports.agregarPiezaTablero =  async (req,res) =>{
+    let nNumeroError = 500;
+    try{
+        
+        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
+            throw "El usuario no tiene derecho a utilizar este metodo"
+        }
+        
+        let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+        if(!partida){
+            nNumeroError = 503;
+            throw 'No se encontro la partida'
+        }
+        const partidaT = convertirMongoAJson(partida);
+        if(!partidaT.hasOwnProperty('posicionPiezasGlobal')){
+            partidaT.posicionPiezasGlobal = {}
+            partida.posicionPiezasGlobal = {}
+        }
+        partidaT.posicionPiezasGlobal[req.body.piezasId] = req.body.posicion;
+        partida.posicionPiezasGlobal = partidaT.posicionPiezasGlobal
+        await partida.save()
+
+        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
+        Request.crearRequest('agregarPiezaTablero',JSON.stringify(req.body),200);
+
+        return res.json({
+            message: 'Agregar configurtacion partida.',
+            data:partida.numeroPartida
+        });
+    }catch(error){
+        console.log(error)
+        Request.crearRequest('agregarPiezaTablero',JSON.stringify(req.body),nNumeroError,error);
+        res.status(nNumeroError).json({
+            error: 'Algo salio mal',
+            data: error.toString()
+        });
+    }
+}
