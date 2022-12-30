@@ -431,15 +431,16 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
                 }
             }
         );
-        if(Object.keys(arrResultado).length == 1){
+        if(partida.tipoJuego === 1 && Object.keys(arrResultado).length == 1){
             vActualizar.$set.estatus = 4
             vActualizar.$set.ganador = arrResultado[0][0];
             const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
             vActualizar.$push = {}
             vActualizar.$push.historialJugadores = "Victoria del jugador "+usuario.usuario;
-        }else{
+        }else if(partida.tipoJuego === 2 && Object.keys(arrResultado).length == 1){
             vActualizar.$set.fechaTurno = Date.now()
-            
+        }else if(partida.tipoJuego === 1 && Object.keys(arrResultado).length == 1){
+            vActualizar.$set.fechaTurno = Date.now()
         }
         
         vActualizar.$inc = {}
