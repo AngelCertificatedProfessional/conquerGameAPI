@@ -437,9 +437,23 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
             const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
             vActualizar.$push = {}
             vActualizar.$push.historialJugadores = "Victoria del jugador "+usuario.usuario;
-        }else if(partida.tipoJuego === 2 && Object.keys(arrResultado).length == 1){
-            vActualizar.$set.fechaTurno = Date.now()
-        }else if(partida.tipoJuego === 1 && Object.keys(arrResultado).length == 1){
+        }else if(partida.tipoJuego === 2 && 
+            //Si el tipo de partida es en equipo
+            (( Object.keys(arrResultado).length == 2 &&
+            //Si la partida se detecta que los ultimos dos valores son orange y black o red y purple entonces se decide el ganador 
+            ((arrResultado[0][0] === "O" && arrResultado[1][0] ==="B" || (arrResultado[0][0] === "R" && arrResultado[1][0] ==="P")))
+            // se valida que solo halla un resultado en caso de que los jugadores que queden sean de diferentres equipos
+            || Object.keys(arrResultado).length === 1 ))){
+                vActualizar.$set.estatus = 4
+                if ( Object.keys(arrResultado).length === 1){
+                    vActualizar.$set.ganador = arrResultado[0][0];
+                }else{
+                    vActualizar.$set.ganador = arrResultado[0][0] +" " +arrResultado[1][0];    
+                }
+                const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
+                vActualizar.$push = {}
+                vActualizar.$push.historialJugadores = "Victoria del jugador "+usuario.usuario;
+        }else{
             vActualizar.$set.fechaTurno = Date.now()
         }
         
