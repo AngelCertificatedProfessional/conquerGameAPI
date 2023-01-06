@@ -431,23 +431,24 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
                 }
             }
         );
-        if((partida.tipoJuego === 1 && Object.keys(arrResultado).length == 1) || 
-            (partida.tipoJuego === 2 && partida.cantidadJugadores === 4 &&
+        //Condicion para detectar que un jugador o un grupo de jugadores gano el juego
+        //Si se detecta que solo hay un jugador
+        if(Object.keys(arrResultado).length === 1 || 
             //Si el tipo de partida es en equipo
-            (( Object.keys(arrResultado).length == 2 &&
+            (partida.tipoJuego === 2 && 
+            //Se evalua la cntidad de jugadores y si quedan es de dos jugadores
+            (partida.cantidadJugadores === 4 && Object.keys(arrResultado).length === 2 &&
             //Si la partida se detecta que los ultimos dos valores son orange y black o red y purple entonces se decide el ganador 
-            ((arrResultado[0][0] === "O" && arrResultado[1][0] ==="B" 
-            || (arrResultado[0][0] === "R" && arrResultado[1][0] ==="P")))
-            // se valida que solo halla un resultado en caso de que los jugadores que queden sean de diferentres equipos
-            || Object.keys(arrResultado).length === 1 ))) || 
-            (partida.tipoJuego === 2 && partida.cantidadJugadores === 6 &&
+            ((arrResultado[0][0] === "O" && arrResultado[1][0] ==="B") ||
+            (arrResultado[0][0] === "R" && arrResultado[1][0] ==="P"))) || 
+            (partida.cantidadJugadores === 6 && ((Object.keys(arrResultado).length === 3 &&
             //Si el tipo de partida es en equipo
-            (( Object.keys(arrResultado).length == 3 &&
             //Si la partida se detecta que los ultimos dos valores son orange y black o red y purple entonces se decide el ganador 
-            ((arrResultado[0][0] === "O" && arrResultado[1][0] ==="B" && arrResultado[2][0] ==="R" 
-            || (arrResultado[0][0] === "P" && arrResultado[1][0] ==="G" && arrResultado[2][0] ==="Y")))
-            // se valida que solo halla un resultado en caso de que los jugadores que queden sean de diferentres equipos
-            || Object.keys(arrResultado).length === 1 )))){
+            (arrResultado[0][0] === "O" && arrResultado[1][0] ==="B" && arrResultado[2][0] ==="R") || 
+            (arrResultado[0][0] === "P" && arrResultado[1][0] ==="G" && arrResultado[2][0] ==="Y")) || 
+            (Object.keys(arrResultado).length === 2 && 
+            (arrResultado[0][0] === "O" && arrResultado[1][0] ==="B") || (arrResultado[0][0] === "O" && arrResultado[1][0] ==="R") || (arrResultado[0][0] === "B" && arrResultado[1][0] ==="R")
+            (arrResultado[0][0] === "P" && arrResultado[1][0] ==="G") || (arrResultado[0][0] === "P" && arrResultado[1][0] ==="Y") || (arrResultado[0][0] === "G" && arrResultado[1][0] ==="Y")))))) {
                 vActualizar.$set.estatus = 4
                 if ( Object.keys(arrResultado).length === 1){
                     vActualizar.$set.ganador = arrResultado[0][0];
