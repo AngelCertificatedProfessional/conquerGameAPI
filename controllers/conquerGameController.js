@@ -437,18 +437,19 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
             //Si el tipo de partida es en equipo
             (partida.tipoJuego === 2 && 
             //Se evalua la cntidad de jugadores y si quedan es de dos jugadores
-            (partida.cantidadJugadores === 4 && Object.keys(arrResultado).length === 2 &&
+            ((partida.cantidadJugadores === 4 && Object.keys(arrResultado).length === 2 &&
             //Si la partida se detecta que los ultimos dos valores son orange y black o red y purple entonces se decide el ganador 
             ((arrResultado[0][0] === "O" && arrResultado[1][0] ==="B") ||
-            (arrResultado[0][0] === "R" && arrResultado[1][0] ==="P"))) || 
+            (arrResultado[0][0] === "R" && arrResultado[1][0] ==="P"))) ||
+            //segmento de evaluacion de 6 jugadores 
             (partida.cantidadJugadores === 6 && ((Object.keys(arrResultado).length === 3 &&
             //Si el tipo de partida es en equipo
             //Si la partida se detecta que los ultimos dos valores son orange y black o red y purple entonces se decide el ganador 
-            (arrResultado[0][0] === "O" && arrResultado[1][0] ==="B" && arrResultado[2][0] ==="R") || 
-            (arrResultado[0][0] === "P" && arrResultado[1][0] ==="G" && arrResultado[2][0] ==="Y")) || 
+            ((arrResultado[0][0] === "O" && arrResultado[1][0] ==="B" && arrResultado[2][0] ==="R") || 
+            (arrResultado[0][0] === "P" && arrResultado[1][0] ==="G" && arrResultado[2][0] ==="Y"))) || 
             (Object.keys(arrResultado).length === 2 && 
-            (arrResultado[0][0] === "O" && arrResultado[1][0] ==="B") || (arrResultado[0][0] === "O" && arrResultado[1][0] ==="R") || (arrResultado[0][0] === "B" && arrResultado[1][0] ==="R")
-            (arrResultado[0][0] === "P" && arrResultado[1][0] ==="G") || (arrResultado[0][0] === "P" && arrResultado[1][0] ==="Y") || (arrResultado[0][0] === "G" && arrResultado[1][0] ==="Y")))))) {
+            ((arrResultado[0][0] === "O" && arrResultado[1][0] === "B") || (arrResultado[0][0] === "O" && arrResultado[1][0] ==="R") || (arrResultado[0][0] === "B" && arrResultado[1][0] === "R") ||
+            (arrResultado[0][0] === "P" && arrResultado[1][0] === "G") || (arrResultado[0][0] === "P" && arrResultado[1][0] ==="Y") || (arrResultado[0][0] === "G" && arrResultado[1][0] === "Y")))))))) {
                 vActualizar.$set.estatus = 4
                 if ( Object.keys(arrResultado).length === 1){
                     vActualizar.$set.ganador = arrResultado[0][0];
