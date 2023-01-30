@@ -40,10 +40,6 @@ const UsuarioSchema = mongoose.Schema({
         type:Boolean,
         required: true,
     },
-    activa:{
-        type:Boolean,
-        required: true,
-    },
     invitado:{
         type:Boolean,
         default:false

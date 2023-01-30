@@ -13,7 +13,6 @@ exports.agregarUsuarioLocal =  async (req,res) =>{
         const salt = bcrypt.genSaltSync();
         usuario.contrasena = bcrypt.hashSync(usuario.contrasena,salt);
         usuario.rol = 2;
-        usuario.activa = false;
         const resultado = await usuario.save();
 
         Request.crearRequest('agregarUsuarioLocal',JSON.stringify(req.body),200);
@@ -56,7 +55,6 @@ exports.agregarUsuarioInvitado =  async (req,res) =>{
         const salt = bcrypt.genSaltSync();
         usuario.contrasena = bcrypt.hashSync(usuario.contrasena,salt);
         usuario.rol = 2;
-        usuario.activa = true;
         const resultado = await usuario.save();
         resultado.contrasena = 'invitado'+vResultado.random
         Request.crearRequest('generarUsuarioInvitado',JSON.stringify(req.body),200);
@@ -113,12 +111,9 @@ const validaUsuario = async (usuario,nId,correo) => {
 exports.iniciarSecion = async(req,res) => {
     try{
         
-        let usuario = await Usuario.findOne({'correo':req.body.correo},{usuario:1,contrasena:1,_id:1,rol:1,activa:1,invitado:1,meme:1});
+        let usuario = await Usuario.findOne({'correo':req.body.correo},{usuario:1,contrasena:1,_id:1,rol:1,invitado:1,meme:1});
         if(!usuario) {
             throw 'El usuario es incorrecto';
-        }
-        if(usuario.activa === undefined || !usuario.activa) {
-            throw 'El usuario no tiene todavia los derechos para entrar al sistema';
         }
         usuario = convertirMongoAJson(usuario);
         usuario.token = Buffer.from(usuario._id.toString()).toString('base64');
@@ -194,7 +189,6 @@ exports.actualizarUsuario = async (req,res) => {
         vResultado.token = Buffer.from(usuario._id.toString()).toString('base64');
         vResultado.usuario = usuario.usuario
         vResultado.rol = usuario.rol  
-        vResultado.activa = usuario.activa 
         vResultado.invitado = usuario.invitado 
         vResultado.meme = usuario.meme 
 
