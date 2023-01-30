@@ -110,7 +110,6 @@ const validaUsuario = async (usuario,nId,correo) => {
 
 exports.iniciarSecion = async(req,res) => {
     try{
-        
         let usuario = await Usuario.findOne({'correo':req.body.correo},{usuario:1,contrasena:1,_id:1,rol:1,invitado:1,meme:1});
         if(!usuario) {
             throw 'El usuario es incorrecto';
@@ -137,22 +136,17 @@ exports.iniciarSecion = async(req,res) => {
 
 const validaSesionUsuario = exports.validaSesionUsuario = async(_id) =>{
     try{
-        const _idUsuario = Buffer.from(_id, 'base64').toString('ascii');
-        const usuario = await Usuario.findOne({_id:_idUsuario});
-        if(!usuario) {
-            return false;
+        if(!(await Usuario.findOne({_id:Buffer.from(_id, 'base64').toString('ascii')}))) {
+            throw "El usuario no tiene derecho a utilizar este metodo";
         }
-        return true;
     }catch(error){
-        return false;
+        throw error.toString();
     }
 }
 
 exports.getUsuariobyId = async (req,res) => {
     try{
-        if(!await validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
+        await validaSesionUsuario(req.headers.authorization)
         const resultado = await Usuario.findOne({'_id':Buffer.from(req.params._id, 'base64').toString('ascii') },{});
         resultado.contrasena = '*xEETR05AAS'
         Request.crearRequest('getUsuariobyId',JSON.stringify(req.params._id),200);
@@ -172,9 +166,7 @@ exports.getUsuariobyId = async (req,res) => {
 
 exports.actualizarUsuario = async (req,res) => {
     try{
-        if(!await validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
+        await validaSesionUsuario(req.headers.authorization)
         if((await validaUsuario(req.body.usuario,req.body._id)) > 0) {
             throw 'El usuario ya existe'
         }
@@ -209,9 +201,7 @@ exports.actualizarUsuario = async (req,res) => {
 
 exports.actualizarContrasena = async (req,res) => {
     try{
-        if(!await validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
+        await validaSesionUsuario(req.headers.authorization)
         const usuario = await Usuario.findOne({'_id':req.body._id});
         usuario.contrasena = req.body.contrasena;
         const salt = bcrypt.genSaltSync();
@@ -235,10 +225,7 @@ exports.actualizarContrasena = async (req,res) => {
 exports.buscar10Mejores =  async (req,res) =>{
     let nNumeroError = 500;
     try{
-        if(!await validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
-        
+        await validaSesionUsuario(req.headers.authorization)
         const usuarios = await Usuario.find({},{usuario:1,puntuaje:1}).sort({"puntuaje":-1}).limit(10)
         if(!usuarios){
             nNumeroError = 503;
@@ -262,9 +249,7 @@ exports.buscar10Mejores =  async (req,res) =>{
 
 exports.actualizarMemes =  async (req,res) =>{
     try{
-        if(!await validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
+        await validaSesionUsuario(req.headers.authorization);
         const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
         usuario.meme = req.body.meme;
         await usuario.save();

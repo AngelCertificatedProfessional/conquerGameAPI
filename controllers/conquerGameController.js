@@ -4,20 +4,17 @@ const Usuario = require('../models/Usuario')
 const Partida = require('../models/Partida')
 const mongoose = require('mongoose')
 const { convertirMongoAJson } = require('../utils/utils')
+
 exports.crearPartida =  async (req,res) =>{
     let nNumeroError = 500;
     let numeroPartida = 0
     try{
-        
-        
-        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
+        await Usuarios.validaSesionUsuario(req.headers.authorization)
         let eliminarPartidaActual = req.body.eliminarUsuarioPartidaActual || false;
         //Se arma segmento para el lado del usuario
         const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
         if(!eliminarPartidaActual && usuario.numeroPartidaActual !== undefined && usuario.numeroPartidaActual !== null){
-            if(validaPartidaExistente(usuario.numeroPartidaActual)){
+            if((await validaPartidaExistente(usuario.numeroPartidaActual))){
                 numeroPartida = usuario.numeroPartidaActual
                 nNumeroError = 530;
                 throw `Ya tienes una partida en curso, ${usuario.numeroPartidaActual}`    
@@ -43,9 +40,13 @@ exports.crearPartida =  async (req,res) =>{
         partida.juego = 1;
         partida.estatus = 1;
         partida.jugadores.push(usuario);
-        await partida.save();
         usuario.numeroPartidaActual = vResultado.random;
-        await usuario.save();
+        
+        await Promise.all([
+            partida.save(),
+            usuario.save()
+        ]);
+
         Request.crearRequest('crearPartida',JSON.stringify(req.body),200);
         return res.json({
             message: 'La partida fue generado exitosamente',
@@ -75,9 +76,7 @@ exports.buscarPartida =  async (req,res) =>{
     let nNumeroError = 500;
     let numeroPartidaAc = 0
     try{
-        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
+        await Usuarios.validaSesionUsuario(req.headers.authorization)
         const partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
         if(!partida){
             nNumeroError = 503;
@@ -97,25 +96,25 @@ exports.buscarPartida =  async (req,res) =>{
         //Se valida que el usuario no este en otra partida
         let eliminarPartidaActual = req.body.eliminarUsuarioPartidaActual || false;
         if(!eliminarPartidaActual && usuario.numeroPartidaActual !== undefined && usuario.numeroPartidaActual !== null){
-            if(validaPartidaExistente(usuario.numeroPartidaActual)){
+            if((await validaPartidaExistente(usuario.numeroPartidaActual))){
                 numeroPartidaAc = usuario.numeroPartidaActual
                 nNumeroError = 530;
                 throw `Ya tienes una partida en curso, ${usuario.numeroPartidaActual}`    
             }
         }
 
-        if(partida.jugadores.length >= partida.cantidadJugadores ){
+        if(partida.jugadores.length >= partida.cantidadJugadores){
             throw 'Esta sala ya cuenta con la capacidad maxima de jugadores'
         }
 
         partida.jugadores.push(usuario);
-        await partida.save();
-
         usuario.numeroPartidaActual = req.body.numeroPartida;
-        await usuario.save();
+        await Promise.all([
+            partida.save(),
+            usuario.save()
+        ]);
 
         Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
-
         return res.json({
             message: 'Partida encontrada.',
             data:partida.jugadores
@@ -142,10 +141,7 @@ exports.buscarPartida =  async (req,res) =>{
 exports.buscarEstatusPartida =  async (req,res) =>{
     let nNumeroError = 500;
     try{
-        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
-        
+        await Usuarios.validaSesionUsuario(req.headers.authorization)
         const partida = await Partida.findOne({numeroPartida:req.params.numeroPartida},{ _id:1,jugadores:1,creadoEl:1,numeroPartida:1,usuario_id:1,
             cantidadJugadores:1,tipoJuego:1,juego:1,estatus:1,fechaTurno:1,posicionPiezasGlobal:1,cantidadTurnosPartida:1,turno:1,ganador:1,historialJugadores: {$slice: -10}})
         if(!partida){
@@ -155,14 +151,14 @@ exports.buscarEstatusPartida =  async (req,res) =>{
 
         req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
         
-        Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
+        Request.crearRequest('buscarEstatusPartida',JSON.stringify(req.body),200);
 
         return res.json({
             message: 'Partida encontrada.',
             data:partida.numeroPartida
         });
     }catch(error){
-        Request.crearRequest('buscarPartida',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest('buscarEstatusPartida',JSON.stringify(req.body),nNumeroError,error);
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()
@@ -173,10 +169,7 @@ exports.buscarEstatusPartida =  async (req,res) =>{
 exports.buscarPartidas =  async (req,res) =>{
     let nNumeroError = 500;
     try{
-        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
-        
+        await Usuarios.validaSesionUsuario(req.headers.authorization)
         const partida = await Partida.find({estatus:1})
         if(!partida){
             nNumeroError = 503;
@@ -204,11 +197,7 @@ exports.buscarPartidas =  async (req,res) =>{
 exports.mostrarTablero =  async (req,res) =>{
     let nNumeroError = 500;
     try{
-        
-        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
-        
+        await Usuarios.validaSesionUsuario(req.headers.authorization)
         const partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
         if(!partida){
             nNumeroError = 503;
@@ -284,10 +273,7 @@ exports.desconectarUsuarioPartida = async (req,res) =>{
 exports.salirPartida = async (req,res) =>{
     let nNumeroError = 500;
     try{
-        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
-        
+        await Usuarios.validaSesionUsuario(req.headers.authorization)
         let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
         if(!partida){
             nNumeroError = 503;
@@ -317,13 +303,13 @@ exports.salirPartida = async (req,res) =>{
         }
 
         req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
-        Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
+        Request.crearRequest('salirPartida',JSON.stringify(req.body),200);
         return res.json({
             message: 'Partida encontrada.',
             data:"usuario eliminado"
         });
     }catch(error){
-        Request.crearRequest('buscarPartida',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest('salirPartida',JSON.stringify(req.body),nNumeroError,error);
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()
@@ -335,11 +321,7 @@ exports.salirPartida = async (req,res) =>{
 exports.agregarPiezasTablero =  async (req,res) =>{
     let nNumeroError = 500;
     try{
-        
-        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
-        
+        await Usuarios.validaSesionUsuario(req.headers.authorization)
         let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
         if(!partida){
             nNumeroError = 503;
@@ -399,11 +381,7 @@ exports.agregarPiezasTablero =  async (req,res) =>{
 exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
     let nNumeroError = 500;
     try{
-        
-        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
-        
+        await Usuarios.validaSesionUsuario(req.headers.authorization)
         let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida},{ _id:1,jugadores:1,creadoEl:1,numeroPartida:1,usuario_id:1,
             cantidadJugadores:1,tipoJuego:1,juego:1,estatus:1,fechaTurno:1,posicionPiezasGlobal:1,cantidadTurnosPartida:1,turno:1,ganador:1,historialJugadores: {$slice: -10}})
         if(!partida){
@@ -531,11 +509,7 @@ const validaPartidaExistente = async(numeroPartida) =>{
 exports.agregarPiezaTablero =  async (req,res) =>{
     let nNumeroError = 500;
     try{
-        
-        if(!await Usuarios.validaSesionUsuario(req.headers.authorization)){
-            throw "El usuario no tiene derecho a utilizar este metodo"
-        }
-        
+        await Usuarios.validaSesionUsuario(req.headers.authorization)
         let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
         if(!partida){
             nNumeroError = 503;
