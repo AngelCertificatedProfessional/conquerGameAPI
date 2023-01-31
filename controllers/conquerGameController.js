@@ -175,8 +175,6 @@ exports.buscarPartidas =  async (req,res) =>{
             nNumeroError = 503;
             throw 'No se encontro la partida'
         }
-
-        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
         
         Request.crearRequest('buscarPartidas',JSON.stringify(req.body),200);
 
@@ -282,14 +280,18 @@ exports.salirPartida = async (req,res) =>{
         //actualizamos al usuario para que la partida actual sea null
         const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
         usuario.numeroPartidaActual = null;
-        await usuario.save();
+        
 
-        await Partida.updateOne(
-            { numeroPartida: req.body.numeroPartida},
-            {
-              $pull: { 'jugadores': {_id:mongoose.Types.ObjectId(usuario._id) }},
-            }
-        );
+        await Promise.all([
+            usuario.save(),
+            Partida.updateOne(
+                { numeroPartida: req.body.numeroPartida},
+                {
+                    $pull: { 'jugadores': {_id:mongoose.Types.ObjectId(usuario._id) }},
+                }
+            )
+        ]);
+
         if(partida.jugadores.length === 1 || partida.usuario_id.toString() === usuario._id.toString()){
             //matamos la partida para todos los jugadores en caso de que solo quede un jugador o el creado salga de la partida
             partida.estatus = 5
