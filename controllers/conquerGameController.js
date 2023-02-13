@@ -343,18 +343,18 @@ exports.agregarPiezasTablero =  async (req,res) =>{
         );
 
         partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+        partida.posicionPiezasGlobal = {}
+        for(let i=0;i<partida.jugadores.length;i++){
+            Object.assign(partida.posicionPiezasGlobal,partida.jugadores[i].posicionPiezasJugador)
+        }
         //en este segmento se verifica si todos los usuarios seleccionaron la opcion de aceptar o no
         //en caso de que si se inicia la partida caso contrario se notifica a los usuarios que un usuario esta listo
         if(partida.jugadores.filter(x => x.listo === true).length === partida.cantidadJugadores){
             partida.estatus = 3;
             partida.fechaTurno = Date.now();
-            //se realiza un ciclo para generar la key de posicionPiezasGlobales
-            partida.posicionPiezasGlobal = {}
-            for(let i=0;i<partida.jugadores.length;i++){
-                Object.assign(partida.posicionPiezasGlobal,partida.jugadores[i].posicionPiezasJugador)
-            }
             await partida.save()
         }else{
+            await partida.save()
             const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
             partida = convertirMongoAJson(partida)
             partida.usuarioListo = usuario.usuario;
@@ -379,6 +379,41 @@ exports.agregarPiezasTablero =  async (req,res) =>{
     }
 }
 
+
+exports.agregarPiezaTablero =  async (req,res) =>{
+    let nNumeroError = 500;
+    try{
+        await Usuarios.validaSesionUsuario(req.headers.authorization)
+        let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
+        if(!partida){
+            nNumeroError = 503;
+            throw 'No se encontro la partida'
+        }
+        const partidaT = convertirMongoAJson(partida);
+        if(!partidaT.hasOwnProperty('posicionPiezasGlobal')){
+            partidaT.posicionPiezasGlobal = {}
+            partida.posicionPiezasGlobal = {}
+        }
+        partidaT.posicionPiezasGlobal[req.body.piezasId] = req.body.posicion;
+        partida.posicionPiezasGlobal = partidaT.posicionPiezasGlobal
+        await partida.save()
+
+        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
+        Request.crearRequest('agregarPiezaTablero',JSON.stringify(req.body),200);
+
+        return res.json({
+            message: 'Agregar configurtacion partida.',
+            data:partida.numeroPartida
+        });
+    }catch(error){
+        console.log(error)
+        Request.crearRequest('agregarPiezaTablero',JSON.stringify(req.body),nNumeroError,error);
+        res.status(nNumeroError).json({
+            error: 'Algo salio mal',
+            data: error.toString()
+        });
+    }
+}
 
 exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
     let nNumeroError = 500;
@@ -479,7 +514,6 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
         partida.jugadorPiezaEliminada = req.body.jugadorPiezaEliminada
         partida.jugadorEliminoPieza = req.body.jugadorEliminoPieza
         req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);    
-        
         Request.crearRequest('actualizarPiezasPosicionJuego',JSON.stringify(req.body),200);
 
         return res.json({
@@ -505,40 +539,5 @@ const validaPartidaExistente = async(numeroPartida) =>{
         return true;
     }catch(error){
         return false;
-    }
-}
-
-exports.agregarPiezaTablero =  async (req,res) =>{
-    let nNumeroError = 500;
-    try{
-        await Usuarios.validaSesionUsuario(req.headers.authorization)
-        let partida = await Partida.findOne({numeroPartida:req.body.numeroPartida})
-        if(!partida){
-            nNumeroError = 503;
-            throw 'No se encontro la partida'
-        }
-        const partidaT = convertirMongoAJson(partida);
-        if(!partidaT.hasOwnProperty('posicionPiezasGlobal')){
-            partidaT.posicionPiezasGlobal = {}
-            partida.posicionPiezasGlobal = {}
-        }
-        partidaT.posicionPiezasGlobal[req.body.piezasId] = req.body.posicion;
-        partida.posicionPiezasGlobal = partidaT.posicionPiezasGlobal
-        await partida.save()
-
-        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
-        Request.crearRequest('agregarPiezaTablero',JSON.stringify(req.body),200);
-
-        return res.json({
-            message: 'Agregar configurtacion partida.',
-            data:partida.numeroPartida
-        });
-    }catch(error){
-        console.log(error)
-        Request.crearRequest('agregarPiezaTablero',JSON.stringify(req.body),nNumeroError,error);
-        res.status(nNumeroError).json({
-            error: 'Algo salio mal',
-            data: error.toString()
-        });
     }
 }

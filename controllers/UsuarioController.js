@@ -110,7 +110,7 @@ const validaUsuario = async (usuario,nId,correo) => {
 
 exports.iniciarSecion = async(req,res) => {
     try{
-        let usuario = await Usuario.findOne({'correo':req.body.correo},{usuario:1,contrasena:1,_id:1,rol:1,invitado:1,meme:1});
+        let usuario = await Usuario.findOne({'correo':req.body.correo},{usuario:1,contrasena:1,_id:1,rol:1,invitado:1});
         if(!usuario) {
             throw 'El usuario es incorrecto';
         }
@@ -182,7 +182,6 @@ exports.actualizarUsuario = async (req,res) => {
         vResultado.usuario = usuario.usuario
         vResultado.rol = usuario.rol  
         vResultado.invitado = usuario.invitado 
-        vResultado.meme = usuario.meme 
 
         Request.crearRequest('actualizarUsuario',JSON.stringify(req.body),200);
         return res.json({
@@ -243,27 +242,6 @@ exports.buscar10Mejores =  async (req,res) =>{
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()
-        });
-    }
-}
-
-exports.actualizarMemes =  async (req,res) =>{
-    try{
-        await validaSesionUsuario(req.headers.authorization);
-        const usuario = await Usuario.findOne({'_id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')});
-        usuario.meme = req.body.meme;
-        await usuario.save();
-        Request.crearRequest('actualizarMemes',JSON.stringify(req.body),200);
-        return res.json({
-            message: 'Envio de usuario',
-            data:true
-        });
-    }catch(error){
-        console.log(error)
-        Request.crearRequest('actualizarMemes',JSON.stringify(req.body),500,error);
-        res.status(500).json({
-            error: 'Algo salio mal',
-            data: error
         });
     }
 }

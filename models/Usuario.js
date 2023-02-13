@@ -47,11 +47,6 @@ const UsuarioSchema = mongoose.Schema({
     puntuaje:{
         type:Number,
         default:false
-    },
-    meme:{
-        type:String,
-        required: false,
-        default:''
     }
 })
 
