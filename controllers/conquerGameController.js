@@ -3,7 +3,7 @@ const Usuarios = require('./UsuarioController')
 const Usuario = require('../models/Usuario')
 const Partida = require('../models/Partida')
 const mongoose = require('mongoose')
-const { convertirMongoAJson } = require('../utils/utils')
+const { convertirMongoAJson, detectarJugador } = require('../utils/utils')
 
 exports.crearPartida =  async (req,res) =>{
     let nNumeroError = 500;
@@ -34,12 +34,13 @@ exports.crearPartida =  async (req,res) =>{
         const partida = new Partida()
         partida.numeroPartida = vResultado.random;
         partida.usuario_id = usuario._id;
+
         partida.cantidadJugadores = true;
         partida.tipoJuego = req.body.tipoJuego;
         partida.cantidadJugadores = req.body.cantidadJugadores;
         partida.juego = 1;
         partida.estatus = 1;
-        partida.jugadores.push(usuario);
+        partida.jugadores.push({...convertirMongoAJson(usuario),turno:detectarJugador(partida.jugadores.length)});  
         usuario.numeroPartidaActual = vResultado.random;
         
         await Promise.all([
@@ -106,8 +107,7 @@ exports.buscarPartida =  async (req,res) =>{
         if(partida.jugadores.length >= partida.cantidadJugadores){
             throw 'Esta sala ya cuenta con la capacidad maxima de jugadores'
         }
-
-        partida.jugadores.push(usuario);
+        partida.jugadores.push({...convertirMongoAJson(usuario),turno:detectarJugador(partida.jugadores.length)});  
         usuario.numeroPartidaActual = req.body.numeroPartida;
         await Promise.all([
             partida.save(),
@@ -332,7 +332,7 @@ exports.agregarPiezasTablero =  async (req,res) =>{
         await Partida.updateOne(
             {
                 numeroPartida:req.body.numeroPartida,
-                'jugadores._id':new mongoose.Types.ObjectId(Buffer.from(req.headers.authorization, 'base64').toString('ascii'))
+                'jugadores._id':Buffer.from(req.headers.authorization, 'base64').toString('ascii')
             }, 
             { 
                 $set: { 
