@@ -3,6 +3,7 @@ const Usuarios = require('./UsuarioController')
 const Usuario = require('../models/Usuario')
 const Partida = require('../models/Partida')
 const mongoose = require('mongoose')
+const socket = require('../sockets/controller').socket;
 const { convertirMongoAJson, detectarJugador } = require('../utils/utils')
 
 exports.crearPartida =  async (req,res) =>{
@@ -149,7 +150,7 @@ exports.buscarEstatusPartida =  async (req,res) =>{
             throw 'No se encontro la partida'
         }
 
-        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
+        socket.io.emit('partida'+partida.numeroPartida, partida);
         
         Request.crearRequest('buscarEstatusPartida',JSON.stringify(req.body),200);
 
@@ -209,7 +210,7 @@ exports.mostrarTablero =  async (req,res) =>{
 
         partida.estatus = 2;
         await partida.save()
-        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
+        socket.io.emit('partida'+partida.numeroPartida, partida);
         
         Request.crearRequest('mostrarTablero',JSON.stringify(req.body),200);
 
@@ -304,7 +305,7 @@ exports.salirPartida = async (req,res) =>{
             partida.nombreUsuario = usuario.usuario;
         }
 
-        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
+        socket.io.emit('partida'+partida.numeroPartida, partida);
         Request.crearRequest('salirPartida',JSON.stringify(req.body),200);
         return res.json({
             message: 'Partida encontrada.',
@@ -360,7 +361,7 @@ exports.agregarPiezasTablero =  async (req,res) =>{
             partida.usuarioListo = usuario.usuario;
             partida.notificarUsuarioListo = true;
         }
-        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
+        socket.io.emit('partida'+partida.numeroPartida, partida);
             
         
         Request.crearRequest('agregarPiezasTablero',JSON.stringify(req.body),200);
@@ -398,7 +399,7 @@ exports.agregarPiezaTablero =  async (req,res) =>{
         partida.posicionPiezasGlobal = partidaT.posicionPiezasGlobal
         await partida.save()
 
-        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);
+        socket.io.emit('partida'+partida.numeroPartida, partida);
         Request.crearRequest('agregarPiezaTablero',JSON.stringify(req.body),200);
 
         return res.json({
@@ -513,7 +514,7 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
         partida.turno = req.body.turno;
         partida.jugadorPiezaEliminada = req.body.jugadorPiezaEliminada
         partida.jugadorEliminoPieza = req.body.jugadorEliminoPieza
-        req.app.settings.socketIo.emit('partida'+partida.numeroPartida, partida);    
+        socket.io.emit('partida'+partida.numeroPartida, partida);    
         Request.crearRequest('actualizarPiezasPosicionJuego',JSON.stringify(req.body),200);
 
         return res.json({

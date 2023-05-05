@@ -1,12 +1,11 @@
-// let  socketN;
-const socketController = (socket) => {
-    console.log('Jugador conectado',socket.id)
-    // socketN = socket;
-    socket.on('disconnect', () => {
-        console.log('Jugador desconectado',socket.id)
-    })
-}
+const socketIO = require('socket.io')
+const socket = {};
+
+function connect(server){
+    socket.io = socketIO(server);
+};
 
 module.exports = {
-    socketController
+    connect,
+    socket
 }

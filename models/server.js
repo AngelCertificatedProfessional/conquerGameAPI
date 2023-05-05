@@ -1,8 +1,6 @@
 const express = require('express');
 const cors = require('cors')
-const app = express()
 const { dbConnection } = require('../database/config');
-const { socketController } = require('../sockets/controller');
 
 class Server {
 
@@ -11,7 +9,7 @@ class Server {
         this.port = process.env.PORT;
         /*Seccion de sockets*/
         this.server = require('http').createServer(this.app);
-        this.io = require('socket.io')(this.server); 
+        this.socket = require('../sockets/controller'); 
         /**/
         this.paths = {
             usuarios:'/api/usuarios',
@@ -48,16 +46,13 @@ class Server {
 
     }
 
-
-
     sockets(){
-        this.io.on('connection',socketController)
+        this.socket.connect(this.server)
     }
 
     routes(){
         this.app.use(this.paths.usuarios,require('../routes/usuarios'))
         this.app.use(this.paths.conquerGame,require('../routes/conquerGame'))
-        this.app.set('socketIo', this.io);
     }
 
     listen(){
