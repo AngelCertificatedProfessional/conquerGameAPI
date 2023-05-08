@@ -1,6 +1,5 @@
-const {Router} = require('express')
+const router = require('express').Router();
 const UsuarioController = require('../controllers/UsuarioController')
-const router = Router();
 
 router.post('/agregarUsuario',UsuarioController.agregarUsuarioLocal);
 router.post('/agregarUsuarioInvitado',UsuarioController.agregarUsuarioInvitado);

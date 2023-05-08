@@ -1,16 +1,16 @@
-const Request = require('../models/Request')
 require('dotenv').config({path:'.env'});
+const Request = require('../models/Request')
 
 exports.crearRequest = async(proceso,req,estatus,error = '') =>{
-    if(process.env.GENERARREQUEST === 'true'){
+    if(generareRequest === 'true'){
         try{
-            const body = {
-                proceso:proceso,
-                estatus:estatus,
+            new Request({
+                proceso:proceso[0],
+                archivo:proceso[1],
+                estatus,
                 request:req,
-                error:error
-            }
-            new Request(body).save()
+                error
+            }).save()
         }catch(error){
             console.log(error)
         }

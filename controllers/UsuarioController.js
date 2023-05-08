@@ -2,7 +2,7 @@ const Usuario = require('../models/Usuario')
 const Request = require('./requestController')
 const bcrypt = require('bcryptjs');
 const UsuariosBloqueados = require('../models/UsuariosBloqueados');
-const { convertirMongoAJson } = require('../utils/utils');
+const { convertirMongoAJson, getFuncName } = require('../utils/utils');
 
 exports.agregarUsuarioLocal =  async (req,res) =>{
     try{
@@ -15,14 +15,14 @@ exports.agregarUsuarioLocal =  async (req,res) =>{
         usuario.rol = 2;
         const resultado = await usuario.save();
 
-        Request.crearRequest('agregarUsuarioLocal',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
 
         return res.json({
             message: 'El usuario fue creado exitosamente',
             data:resultado
         });
     }catch(error){
-        Request.crearRequest('agregarUsuarioLocal',JSON.stringify(req.body),500,error.toString());
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(500).json({
             error: 'Algo salio mal',
             data: error.toString()
@@ -57,14 +57,14 @@ exports.agregarUsuarioInvitado =  async (req,res) =>{
         usuario.rol = 2;
         const resultado = await usuario.save();
         resultado.contrasena = 'invitado'+vResultado.random
-        Request.crearRequest('generarUsuarioInvitado',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
 
         return res.json({
             message: 'El usuario fue creado exitosamente',
             data:resultado
         });
     }catch(error){
-        Request.crearRequest('generarUsuarioInvitado',JSON.stringify(req.body),500,error.toString());
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(500).json({
             error: 'Algo salio mal',
             data: error.toString()
@@ -121,12 +121,13 @@ exports.iniciarSecion = async(req,res) => {
         }
         delete usuario["contrasena"];
         delete usuario["_id"];
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
         return res.json({
             message: 'Envio de iniciar sesion',
             data:Buffer.from(JSON.stringify(usuario)).toString('base64')
         });
     }catch(error){
-        console.log(error)
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(500).json({
             error: 'Algo salio mal',
             data: error
@@ -149,13 +150,13 @@ exports.getUsuariobyId = async (req,res) => {
         await validaSesionUsuario(req.headers.authorization)
         const resultado = await Usuario.findOne({'_id':Buffer.from(req.params._id, 'base64').toString('ascii') },{});
         resultado.contrasena = '*xEETR05AAS'
-        Request.crearRequest('getUsuariobyId',JSON.stringify(req.params._id),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.params._id),200);
         return res.json({
             message: 'Envio de usuario',
             data:resultado
         });
     }catch(error){
-        Request.crearRequest('getUsuariobyId',JSON.stringify(req.params._id),500,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.params._id),500,error.toString());
         res.status(500).json({
             error: 'Algo salio mal',
             data: error
@@ -183,14 +184,14 @@ exports.actualizarUsuario = async (req,res) => {
         vResultado.rol = usuario.rol  
         vResultado.invitado = usuario.invitado 
 
-        Request.crearRequest('actualizarUsuario',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
         return res.json({
             message: 'Envio de usuario',
             data:Buffer.from(JSON.stringify(vResultado)).toString('base64')
         });
     }catch(error){
         console.log(error)
-        Request.crearRequest('actualizarUsuario',JSON.stringify(req.body),500,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(500).json({
             error: 'Algo salio mal',
             data: error
@@ -206,14 +207,14 @@ exports.actualizarContrasena = async (req,res) => {
         const salt = bcrypt.genSaltSync();
         usuario.contrasena = bcrypt.hashSync(usuario.contrasena,salt);
         const resultado = await usuario.save();
-        Request.crearRequest('actualizarContrasena',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
         return res.json({
             message: 'Envio de usuario',
             data:resultado
         });
     }catch(error){
         console.log(error)
-        Request.crearRequest('actualizarContrasena',JSON.stringify(req.body),500,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(500).json({
             error: 'Algo salio mal',
             data: error
@@ -231,14 +232,14 @@ exports.buscar10Mejores =  async (req,res) =>{
             throw 'No se encontro la partida'
         }
         
-        Request.crearRequest('buscar10Mejores',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
 
         return res.json({
             message: 'usuarios.',
             data:usuarios
         });
     }catch(error){
-        Request.crearRequest('buscar10Mejores',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()

@@ -4,7 +4,7 @@ const Usuario = require('../models/Usuario')
 const Partida = require('../models/Partida')
 const mongoose = require('mongoose')
 const socket = require('../sockets/controller').socket;
-const { convertirMongoAJson, detectarJugador } = require('../utils/utils')
+const { convertirMongoAJson, detectarJugador, getFuncName } = require('../utils/utils')
 
 exports.crearPartida =  async (req,res) =>{
     let nNumeroError = 500;
@@ -49,13 +49,13 @@ exports.crearPartida =  async (req,res) =>{
             usuario.save()
         ]);
 
-        Request.crearRequest('crearPartida',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
         return res.json({
             message: 'La partida fue generado exitosamente',
             data:vResultado
         });
     }catch(error){
-        Request.crearRequest('crearPartida',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         if(nNumeroError === 530){
             let vResultadoE = {}
             vResultadoE.numeroPartida = numeroPartida;
@@ -115,13 +115,13 @@ exports.buscarPartida =  async (req,res) =>{
             usuario.save()
         ]);
 
-        Request.crearRequest('buscarPartida',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
         return res.json({
             message: 'Partida encontrada.',
             data:partida.jugadores
         });
     }catch(error){
-        Request.crearRequest('buscarPartida',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         if(nNumeroError === 530){
             let vResultadoE = {}
             vResultadoE.numeroPartida = numeroPartidaAc;
@@ -152,14 +152,13 @@ exports.buscarEstatusPartida =  async (req,res) =>{
 
         socket.io.emit('partida'+partida.numeroPartida, partida);
         
-        Request.crearRequest('buscarEstatusPartida',JSON.stringify(req.body),200);
-
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
         return res.json({
             message: 'Partida encontrada.',
             data:partida.numeroPartida
         });
     }catch(error){
-        Request.crearRequest('buscarEstatusPartida',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()
@@ -177,14 +176,14 @@ exports.buscarPartidas =  async (req,res) =>{
             throw 'No se encontro la partida'
         }
         
-        Request.crearRequest('buscarPartidas',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
 
         return res.json({
             message: 'Partidas.',
             data:partida
         });
     }catch(error){
-        Request.crearRequest('buscarPartidas',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()
@@ -212,14 +211,14 @@ exports.mostrarTablero =  async (req,res) =>{
         await partida.save()
         socket.io.emit('partida'+partida.numeroPartida, partida);
         
-        Request.crearRequest('mostrarTablero',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
 
         return res.json({
             message: 'Agregar configurtacion partida.',
             data:partida.numeroPartida
         });
     }catch(error){
-        Request.crearRequest('mostrarTablero',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()
@@ -261,7 +260,7 @@ exports.desconectarUsuarioPartida = async (req,res) =>{
             data:"partida.numeroPartida"
         });
     }catch(error){
-        Request.crearRequest('buscarPartida',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()
@@ -306,13 +305,13 @@ exports.salirPartida = async (req,res) =>{
         }
 
         socket.io.emit('partida'+partida.numeroPartida, partida);
-        Request.crearRequest('salirPartida',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
         return res.json({
             message: 'Partida encontrada.',
             data:"usuario eliminado"
         });
     }catch(error){
-        Request.crearRequest('salirPartida',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()
@@ -364,7 +363,7 @@ exports.agregarPiezasTablero =  async (req,res) =>{
         socket.io.emit('partida'+partida.numeroPartida, partida);
             
         
-        Request.crearRequest('agregarPiezasTablero',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
 
         return res.json({
             message: 'Agregar configurtacion partida.',
@@ -372,7 +371,7 @@ exports.agregarPiezasTablero =  async (req,res) =>{
         });
     }catch(error){
         console.log(error)
-        Request.crearRequest('agregarPiezasTablero',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()
@@ -400,15 +399,14 @@ exports.agregarPiezaTablero =  async (req,res) =>{
         await partida.save()
 
         socket.io.emit('partida'+partida.numeroPartida, partida);
-        Request.crearRequest('agregarPiezaTablero',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
 
         return res.json({
             message: 'Agregar configurtacion partida.',
             data:partida.numeroPartida
         });
     }catch(error){
-        console.log(error)
-        Request.crearRequest('agregarPiezaTablero',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()
@@ -515,7 +513,7 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
         partida.jugadorPiezaEliminada = req.body.jugadorPiezaEliminada
         partida.jugadorEliminoPieza = req.body.jugadorEliminoPieza
         socket.io.emit('partida'+partida.numeroPartida, partida);    
-        Request.crearRequest('actualizarPiezasPosicionJuego',JSON.stringify(req.body),200);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
 
         return res.json({
             message: 'Agregar configurtacion partida.',
@@ -523,7 +521,7 @@ exports.actualizarPiezasPosicionJuego =  async (req,res) =>{
         });
     }catch(error){
         console.log(error)
-        Request.crearRequest('actualizarPiezasPosicionJuego',JSON.stringify(req.body),nNumeroError,error);
+        Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
         res.status(nNumeroError).json({
             error: 'Algo salio mal',
             data: error.toString()

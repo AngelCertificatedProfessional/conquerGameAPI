@@ -5,6 +5,10 @@ const RequestSchema = mongoose.Schema({
         type:String,
         required:true,
     },
+    archivo:{
+        type:String,
+        required:true,
+    },
     request:{
         type:String,
     },
@@ -19,5 +23,8 @@ const RequestSchema = mongoose.Schema({
 })
 
 RequestSchema.index({creado:'date'})
+RequestSchema.index({creado: 1},{
+    expireAfterSeconds: 259200
+})
 
 module.exports = mongoose.model('Request',RequestSchema,'request')
