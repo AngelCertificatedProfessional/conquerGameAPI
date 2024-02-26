@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors')
-const { dbConnection } = require('../database/config');
+const { dbConnection } = require('../database/db');
 
 class Server {
 
@@ -9,11 +9,11 @@ class Server {
         this.port = process.env.PORT;
         /*Seccion de sockets*/
         this.server = require('http').createServer(this.app);
-        this.socket = require('../sockets/controller'); 
+        //this.socket = require('../sockets/controller'); 
         /**/
         this.paths = {
-            usuarios:'/api/usuarios',
-            conquerGame:'/api/conquerGame',
+            usuarios:'/api/usuario',
+            // conquerGame:'/api/conquerGame',
         }
 
         //Conectar a base de datos
@@ -23,7 +23,7 @@ class Server {
         this.middlewares();
     
         //sockets
-        this.sockets();
+        //this.sockets();
 
         //Rutas de mi aplicacion
         this.routes();
@@ -52,7 +52,7 @@ class Server {
 
     routes(){
         this.app.use(this.paths.usuarios,require('../routes/usuarios'))
-        this.app.use(this.paths.conquerGame,require('../routes/conquerGame'))
+        // this.app.use(this.paths.conquerGame,require('../routes/conquerGame'))
     }
 
     listen(){
