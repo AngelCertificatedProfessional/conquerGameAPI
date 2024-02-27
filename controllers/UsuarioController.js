@@ -63,7 +63,8 @@ exports.agregarUsuarioInvitado =  async (req,res) =>{
         crearRequest(getFuncName(),JSON.stringify(req.body),200);
 
         return res.json({
-            token
+            token,
+            usuario:usuario.usuario
         });
     }catch(error){
         crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
