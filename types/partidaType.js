@@ -1,0 +1,7 @@
+exports.CONQUERGAMEPARTIDA = Object.freeze({
+    LOBBY: 1,
+    AGREGARPIEZASTABLERO: 2,
+    JUEGOINICIADO: 3,
+    FINALIZADO: 4,
+    CANCELADO: 5,
+})

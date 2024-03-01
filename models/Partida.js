@@ -1,4 +1,5 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const { CONQUERGAMEPARTIDA } = require('../types/partidaType');
 
 const PartidaSchema = mongoose.Schema({
     numeroPartida:{
@@ -30,7 +31,13 @@ const PartidaSchema = mongoose.Schema({
     estatus:{
         type:Number,
         required:true,
-        emun: [1,2,3,4,5] //1. Buscando jugadores,2. Agregar piezas Tablero. 3.Juego Iniciado 4. Finalizado 5.cancelado
+        emun: [
+            CONQUERGAMEPARTIDA.LOBBY,
+            CONQUERGAMEPARTIDA.AGREGARPIEZASTABLERO,
+            CONQUERGAMEPARTIDA.JUEGOINICIADO,
+            CONQUERGAMEPARTIDA.FINALIZADO,
+            CONQUERGAMEPARTIDA.CANCELADO
+        ] //1. Buscando jugadores,2. Agregar piezas Tablero. 3.Juego Iniciado 4. Finalizado 5.cancelado
     },
     posicionPiezasGlobal:{
         type:Object,

@@ -1,7 +1,11 @@
 const router = require('express').Router();
-const ConquerGameController = require('../controllers/conquerGameController')
+const {crearPartida} = require('../controllers/conquerGameController')
+const { validarJWT } = require('../middlewares/validar-jwt');
+const { validarSesionUsuario } = require('../middlewares/validar-usuario');
+router.use(validarJWT)
+router.use(validarSesionUsuario)
 
-// router.post('/crearPartida',ConquerGameController.crearPartida);
+router.post('/crearPartida',crearPartida);
 // router.patch('/buscarPartida',ConquerGameController.buscarPartida);
 // router.get('/buscarEstatusPartida/:numeroPartida',ConquerGameController.buscarEstatusPartida);
 // router.patch('/mostrarTablero',ConquerGameController.mostrarTablero);
