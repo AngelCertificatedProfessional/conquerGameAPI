@@ -28,11 +28,11 @@ exports.validarUsuarioContrasenaLogin = async (req = request, res = response, ne
 
 exports.validarSesionUsuario = async (req = request, res = response, next) => {
     try {
-        const usuario = await Usuario.findOne({ '_id': req.uid }, { _id: 1 });
+        const usuario = await Usuario.findOne({ '_id': req.uid }, {});
         if (!usuario) {
             throw "El usuario no tiene derecho a utilizar este metodo"
         }
-        req.usuarioLogueado = usuario.usuarioLogueado
+        req.usuarioLogueado = usuario
         next()
     } catch (error) {
         crearRequest(getFuncName(), JSON.stringify(req.body), 500, error.toString());

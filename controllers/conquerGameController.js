@@ -1,12 +1,13 @@
-const Usuarios = require('./UsuarioController')
+// const Usuarios = require('./UsuarioController')
 const Usuario = require('../models/Usuario')
-const Partida = require('../models/Partida')
-const mongoose = require('mongoose')
-const socket = require('../sockets/controller').socket;
-const { convertirMongoAJson, detectarJugador } = require('../utils/utils')
+const ConquerGame = require('../models/ConquerGame')
+// const mongoose = require('mongoose')
+// const socket = require('../sockets/controller').socket;
+// const { convertirMongoAJson, detectarJugador } = require('../utils/utils')
 const { crearRequest } = require("../helpers/request");
 const { getFuncName } = require('../helpers/getFuncName');
 const { generarPartida } = require('../helpers/conquerGameHelper');
+const { CONQUERGAMEPARTIDA, JUGADORESARREGLO } = require('../types/conquerGameType');
 
 exports.crearPartida =  async (req,res) =>{
     let nNumeroError = 500;
@@ -14,7 +15,6 @@ exports.crearPartida =  async (req,res) =>{
     try{
     //     let eliminarPartidaActual = req.body.eliminarUsuarioPartidaActual || false;
     //     //Se arma segmento para el lado del usuario
-        const usuario = await Usuario.findOne({'_id':req.uid});
     //     if(!eliminarPartidaActual && usuario.numeroPartidaActual !== undefined && usuario.numeroPartidaActual !== null){
     //         if((await validaPartidaExistente(usuario.numeroPartidaActual))){
     //             numeroPartida = usuario.numeroPartidaActual
@@ -22,50 +22,41 @@ exports.crearPartida =  async (req,res) =>{
     //             throw `Ya tienes una partida en curso, ${usuario.numeroPartidaActual}`    
     //         }
     //     }
-
         const vResultado = {}
         vResultado.random = await generarPartida()
-        console.log(vResultado.random)
-        
-    //     //Se arma segmento para el lado de la partida
-    //     const partida = new Partida()
-    //     partida.numeroPartida = vResultado.random;
-    //     partida.usuario_id = usuario._id;
-
-    //     partida.cantidadJugadores = true;
-    //     partida.tipoJuego = req.body.tipoJuego;
-    //     partida.cantidadJugadores = req.body.cantidadJugadores;
-    //     partida.juego = 1;
-    //     partida.estatus = 1;
-    //     partida.jugadores.push({...convertirMongoAJson(usuario),turno:detectarJugador(partida.jugadores.length)});  
-    //     usuario.numeroPartidaActual = vResultado.random;
-        
-    //     await Promise.all([
-    //         partida.save(),
+        //Se arma segmento para el lado de la partida
+        const conquerGame = new ConquerGame()
+        conquerGame.numeroPartida = vResultado.random;
+        conquerGame.usuario_id = req.uid;
+        conquerGame.tipoJuego = req.body.tipoJuego;
+        conquerGame.estatus = CONQUERGAMEPARTIDA.LOBBY;
+        conquerGame.cantidadJugadores = req.body.cantidadJugadores;
+        conquerGame.jugadores.push({...(req.usuarioLogueado),turno:JUGADORESARREGLO[0]});  
+        // usuario.numeroPartidaActual = vResultado.random;
+        await Promise.all([
+            conquerGame.save(),
     //         usuario.save()
-    //     ]);
-
-    //     Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
+        ]);
+        crearRequest(getFuncName(),JSON.stringify(req.body),200);
         return res.json({
-            data:vResultado
+            data:conquerGame
         });
     }catch(error){
         crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
-    //     if(nNumeroError === 530){
-    //         let vResultadoE = {}
-    //         vResultadoE.numeroPartida = numeroPartida;
-    //         vResultadoE.existe = true;
-    //         res.json({
-    //             message: 'La partida ya existe',
-    //             data:vResultadoE
-    //         });
-    //     }else{
-    //         res.status(nNumeroError).json({
-    //             error: 'Algo salio mal',
-    //             data: error.toString(),
-    //         });
-    //     }
-        
+        // if(nNumeroError === 530){
+        //     let vResultadoE = {}
+        //     vResultadoE.numeroPartida = numeroPartida;
+        //     vResultadoE.existe = true;
+        //     res.json({
+        //         message: 'La partida ya existe',
+        //         data:vResultadoE
+        //     });
+        // }else{
+            res.status(nNumeroError).json({
+                error: 'Algo salio mal',
+                data: error.toString(),
+            });
+        // }
     }
 }
 

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-const { CONQUERGAMEPARTIDA } = require('../types/partidaType');
+const { CONQUERGAMEPARTIDA, ACCIONTIPOJUEGO, JUGADORESARREGLO } = require('../types/conquerGameType');
 
-const PartidaSchema = mongoose.Schema({
+const ConquerGameSchema = mongoose.Schema({
     numeroPartida:{
         type:Number,
         required: [true,'El numero de la partida es automaticva'],
@@ -17,12 +17,7 @@ const PartidaSchema = mongoose.Schema({
     tipoJuego:{
         type:Number,
         required:true,
-        emun: [1,2]
-    },
-    juego:{
-        type:Number,
-        required:true,
-        emun: [1]
+        emun: [ACCIONTIPOJUEGO.INIDIVIDUAL,ACCIONTIPOJUEGO.EQUIPO]
     },
     jugadores:{
         type:Array,
@@ -51,7 +46,14 @@ const PartidaSchema = mongoose.Schema({
     ganador:{
         type:String,
         required:false,
-        emun: ['O','B','R','P'] //Representa a los 6 jugadores
+        emun: [
+            JUGADORESARREGLO[0],
+            JUGADORESARREGLO[1],
+            JUGADORESARREGLO[2],
+            JUGADORESARREGLO[3],
+            JUGADORESARREGLO[4],
+            JUGADORESARREGLO[5]
+        ] //Representa a los 6 jugadores
     },
     creadoEl:{
         type:Date,
@@ -71,5 +73,5 @@ const PartidaSchema = mongoose.Schema({
         required:false
     }
 })
-PartidaSchema.index({creadoEl: 1},{expireAfterSeconds: 604800});
-module.exports = mongoose.model('Partida',PartidaSchema,'partida')
+ConquerGameSchema.index({creadoEl: 1},{expireAfterSeconds: 604800});
+module.exports = mongoose.model('ConquerGame',ConquerGameSchema,'conquerGame')

@@ -1,12 +1,12 @@
-const Partida = require("../models/Partida");
-const { CONQUERGAMEPARTIDA } = require("../types/partidaType");
+const Partida = require("../models/ConquerGame");
+const { CONQUERGAMEPARTIDA } = require("../types/conquerGameType");
 
 exports.generarPartida = async() => {
     let random = 0;
     let bCumple = false;
     while(!bCumple){
         random = Math.floor(Math.random() * (10000 - 1000) + 1000);
-        if(!(await validaPartidaExistente(vResultado.random)) > 0) {
+        if(!(await validaPartidaExistente(random)) > 0) {
             return random
         }
     }

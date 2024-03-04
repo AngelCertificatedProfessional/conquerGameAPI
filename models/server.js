@@ -13,7 +13,7 @@ class Server {
         /**/
         this.paths = {
             usuarios:'/api/usuario',
-            // conquerGame:'/api/conquerGame',
+            conquerGame:'/api/conquerGame',
         }
 
         //Conectar a base de datos
@@ -52,7 +52,7 @@ class Server {
 
     routes(){
         this.app.use(this.paths.usuarios,require('../routes/usuarios'))
-        // this.app.use(this.paths.conquerGame,require('../routes/conquerGame'))
+        this.app.use(this.paths.conquerGame,require('../routes/conquerGame'))
     }
 
     listen(){
