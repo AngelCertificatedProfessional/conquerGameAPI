@@ -39,6 +39,7 @@ exports.crearPartida =  async (req,res) =>{
         ]);
         crearRequest(getFuncName(),JSON.stringify(req.body),200);
         return res.json({
+            ok: true,
             data:conquerGame
         });
     }catch(error){
@@ -53,12 +54,30 @@ exports.crearPartida =  async (req,res) =>{
         //     });
         // }else{
             res.status(nNumeroError).json({
-                error: 'Algo salio mal',
+                ok: false,
                 data: error.toString(),
             });
         // }
     }
 }
+
+exports.buscarPartidas =  async (req,res) =>{
+    try{
+        const partida = await ConquerGame.find({estatus:CONQUERGAMEPARTIDA.LOBBY})        
+        crearRequest(getFuncName(),JSON.stringify(req.body),200);
+        return res.json({
+            ok: true,
+            data:partida
+        });
+    }catch(error){
+        crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
+        res.status(500).json({
+            ok: false,
+            data: error.toString()
+        });
+    }
+}
+
 
 // exports.buscarPartida =  async (req,res) =>{
 //     let nNumeroError = 500;
@@ -152,30 +171,7 @@ exports.crearPartida =  async (req,res) =>{
 //     }
 // }
 
-// exports.buscarPartidas =  async (req,res) =>{
-//     let nNumeroError = 500;
-//     try{
-//         await Usuarios.validaSesionUsuario(req.headers.authorization)
-//         const partida = await Partida.find({estatus:1})
-//         if(!partida){
-//             nNumeroError = 503;
-//             throw 'No se encontro la partida'
-//         }
-        
-//         Request.crearRequest(getFuncName(),JSON.stringify(req.body),200);
 
-//         return res.json({
-//             message: 'Partidas.',
-//             data:partida
-//         });
-//     }catch(error){
-//         Request.crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
-//         res.status(nNumeroError).json({
-//             error: 'Algo salio mal',
-//             data: error.toString()
-//         });
-//     }
-// }
 
 
 // exports.mostrarTablero =  async (req,res) =>{
