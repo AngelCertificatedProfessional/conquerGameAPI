@@ -63,7 +63,40 @@ exports.crearPartida =  async (req,res) =>{
 
 exports.buscarPartidas =  async (req,res) =>{
     try{
-        const partida = await ConquerGame.find({estatus:CONQUERGAMEPARTIDA.LOBBY})        
+        const partida = await ConquerGame.aggregate([
+            {
+                $match:{
+                    estatus:CONQUERGAMEPARTIDA.LOBBY
+                }
+            },     
+            {
+                $lookup: {
+                    from: 'usuario',
+                    localField: 'usuario_id',
+                    foreignField: '_id',
+                    pipeline: [
+                        {
+                            '$project': {
+                                'usuario': 1
+                            }
+                        }
+                    ],
+                    as: 'usuarios'
+                }
+            },
+            {
+                '$unwind': '$usuarios'
+            },
+            {
+                '$project': {
+                    'id':'$_id',
+                    'cantidadJugadores':1,
+                    'tipoJuego':1,
+                    'usuarios.usuario':1
+                }
+            },
+        ])
+
         crearRequest(getFuncName(),JSON.stringify(req.body),200);
         return res.json({
             ok: true,
