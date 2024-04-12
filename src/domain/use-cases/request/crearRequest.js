@@ -1,4 +1,4 @@
-const Request = require('../models/request')
+const Request = require('../../../data/mongo/models/Request')
 
 exports.crearRequest = async (proceso, req, estatus, error = '') => {
     if (process.env.GENERAREQUEST === 'true') {

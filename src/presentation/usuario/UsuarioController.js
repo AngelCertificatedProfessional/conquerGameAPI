@@ -1,12 +1,14 @@
-const { getFuncName } = require("../helpers/getFuncName");
-const { crearRequest } = require("../helpers/request");
-const { validaUsuario } = require("../helpers/usuario");
-const usuarioModel = require('../models/Usuario')
-// const Request = require('./requestController')
-const bcrypt = require('bcryptjs');
-const { generarJWT } = require("../helpers/jwt");
+// const { getFuncName } = require("../../../helpers/getFuncName");
+// const { crearRequest } = require("../helpers/request");
+// const { validaUsuario } = require("../../../helpers/usuario");
+// const usuarioModel = require('../../data/mongo/models/Usuario')
+// // const Request = require('./requestController')
+// const bcrypt = require('bcryptjs');
+// const { generarJWT } = require("../../../helpers/jwt");
 // const UsuariosBloqueados = require('../models/UsuariosBloqueados');
 // const { convertirMongoAJson } = require('../utils/utils');
+
+const { agregarUsuarioInvitado } = require("../../domain/use-cases/usuario/agregarUsuarioInvitado");
 
 // exports.agregarUsuarioLocal =  async (req,res) =>{
 //     try{
@@ -34,45 +36,9 @@ const { generarJWT } = require("../helpers/jwt");
 //     }
 // }
 
-exports.agregarUsuarioInvitado =  async (req,res) =>{
-    try{
-        const vResultado = {}
-        let bCumple = true;
-        while(bCumple){
-            vResultado.random = Math.floor(Math.random() * (10000 - 1000) + 1000);
-            let usuarioInvitado = 'invitado'+vResultado.random
-            let correoInvitado = 'invitado'+vResultado.random
-            if(!(await validaUsuario(usuarioInvitado,null,correoInvitado)) > 0) {
-                bCumple = false;
-            }
-        }
-        const usuario = new usuarioModel()
-        usuario.correo = 'invitado'+vResultado.random
-        usuario.usuario = 'invitado'+vResultado.random
-        usuario.contrasena = 'invitado'+vResultado.random
-        usuario.nombre = 'invitado'+vResultado.random;
-        usuario.apellido = 'invitado'+vResultado.random;
-        usuario.aceptoTerminosYCondiciones = true;
-        usuario.invitado = true;
-        usuario.contrasena = bcrypt.hashSync(usuario.contrasena, bcrypt.genSaltSync(10));
-        usuario.rol = 2;
-        const resultado = await usuario.save();
-        const token = await generarJWT(resultado._id, usuario.usuario);
-        resultado.contrasena = 'invitado'+vResultado.random
-        resultado.uid        = resultado._id
-        crearRequest(getFuncName(),JSON.stringify(req.body),200);
-
-        return res.json({
-            token,
-            usuario:usuario.usuario
-        });
-    }catch(error){
-        crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
-        res.status(500).json({
-            error: 'Algo salio mal',
-            data: error.toString()
-        });
-    }
+exports.agregarUsuarioInvitado = (req,res) =>{
+    agregarUsuarioInvitado(req).then(todos => res.json(todos))
+    .catch(error => res.status(400).json({ error }))
 }
 
 // exports.iniciarSecion = async(req,res) => {

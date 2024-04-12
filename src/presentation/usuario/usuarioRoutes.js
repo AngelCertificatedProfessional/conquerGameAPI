@@ -1,8 +1,8 @@
 const router = require('express').Router();
-const {agregarUsuarioInvitado} = require('../controllers/UsuarioController')
+const { agregarUsuarioInvitado } = require('./UsuarioController')
 
 // router.post('/agregarUsuario',UsuarioController.agregarUsuarioLocal);
-router.get('/agregarUsuarioInvitado',agregarUsuarioInvitado);
+router.get('/agregarUsuarioInvitado', agregarUsuarioInvitado);
 // router.post('/iniciarSecion',UsuarioController.iniciarSecion);
 // router.get('/consultaById/:_id',UsuarioController.getUsuariobyId)
 // router.put('/actualizarUsuario',UsuarioController.actualizarUsuario)

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { CONQUERGAMEPARTIDA, ACCIONTIPOJUEGO, JUGADORESARREGLO } = require('../types/conquerGameType');
+const { CONQUERGAMEPARTIDA, ACCIONTIPOJUEGO, JUGADORESARREGLO } = require('../../../../types/conquerGameType');
 
 const ConquerGameSchema = mongoose.Schema({
     numeroPartida: {

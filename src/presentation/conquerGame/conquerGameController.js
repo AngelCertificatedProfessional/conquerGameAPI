@@ -1,114 +1,119 @@
-// const Usuarios = require('./UsuarioController')
-const Usuario = require('../models/Usuario')
-const ConquerGame = require('../models/ConquerGame')
-// const mongoose = require('mongoose')
-// const socket = require('../sockets/controller').socket;
-// const { convertirMongoAJson, detectarJugador } = require('../utils/utils')
-const { crearRequest } = require("../helpers/request");
-const { getFuncName } = require('../helpers/getFuncName');
-const { generarPartida } = require('../helpers/conquerGameHelper');
-const { CONQUERGAMEPARTIDA, JUGADORESARREGLO } = require('../types/conquerGameType');
+// // const Usuarios = require('./UsuarioController')
+// const Usuario = require('../../data/mongo/models/Usuario')
+// const ConquerGame = require('../../data/mongo/models/ConquerGame')
+// // const mongoose = require('mongoose')
+// // const socket = require('../sockets/controller').socket;
+// // const { convertirMongoAJson, detectarJugador } = require('../utils/utils')
+// const { crearRequest } = require("../helpers/request");
+// const { getFuncName } = require('../../../helpers/getFuncName');
+// const { generarPartida } = require('../../../helpers/conquerGameHelper');
+// const { CONQUERGAMEPARTIDA, JUGADORESARREGLO } = require('../../../types/conquerGameType');
 
 exports.crearPartida =  async (req,res) =>{
-    let nNumeroError = 500;
-    let numeroPartida = 0
-    try{
-    //     let eliminarPartidaActual = req.body.eliminarUsuarioPartidaActual || false;
-    //     //Se arma segmento para el lado del usuario
-    //     if(!eliminarPartidaActual && usuario.numeroPartidaActual !== undefined && usuario.numeroPartidaActual !== null){
-    //         if((await validaPartidaExistente(usuario.numeroPartidaActual))){
-    //             numeroPartida = usuario.numeroPartidaActual
-    //             nNumeroError = 530;
-    //             throw `Ya tienes una partida en curso, ${usuario.numeroPartidaActual}`    
-    //         }
-    //     }
-        const vResultado = {}
-        vResultado.random = await generarPartida()
-        //Se arma segmento para el lado de la partida
-        const conquerGame = new ConquerGame()
-        conquerGame.numeroPartida = vResultado.random;
-        conquerGame.usuario_id = req.uid;
-        conquerGame.tipoJuego = req.body.tipoJuego;
-        conquerGame.estatus = CONQUERGAMEPARTIDA.LOBBY;
-        conquerGame.cantidadJugadores = req.body.cantidadJugadores;
-        conquerGame.jugadores.push({...(req.usuarioLogueado),turno:JUGADORESARREGLO[0]});  
-        // usuario.numeroPartidaActual = vResultado.random;
-        await Promise.all([
-            conquerGame.save(),
-    //         usuario.save()
-        ]);
-        crearRequest(getFuncName(),JSON.stringify(req.body),200);
-        return res.json({
-            ok: true,
-            data:conquerGame
-        });
-    }catch(error){
-        crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
-        // if(nNumeroError === 530){
-        //     let vResultadoE = {}
-        //     vResultadoE.numeroPartida = numeroPartida;
-        //     vResultadoE.existe = true;
-        //     res.json({
-        //         message: 'La partida ya existe',
-        //         data:vResultadoE
-        //     });
-        // }else{
-            res.status(nNumeroError).json({
-                ok: false,
-                data: error.toString(),
-            });
-        // }
-    }
+    // let nNumeroError = 500;
+    // let numeroPartida = 0
+    // try{
+    // //     let eliminarPartidaActual = req.body.eliminarUsuarioPartidaActual || false;
+    // //     //Se arma segmento para el lado del usuario
+    // //     if(!eliminarPartidaActual && usuario.numeroPartidaActual !== undefined && usuario.numeroPartidaActual !== null){
+    // //         if((await validaPartidaExistente(usuario.numeroPartidaActual))){
+    // //             numeroPartida = usuario.numeroPartidaActual
+    // //             nNumeroError = 530;
+    // //             throw `Ya tienes una partida en curso, ${usuario.numeroPartidaActual}`    
+    // //         }
+    // //     }
+    //     const vResultado = {}
+    //     vResultado.random = await generarPartida()
+    //     //Se arma segmento para el lado de la partida
+    //     const conquerGame = new ConquerGame()
+    //     conquerGame.numeroPartida = vResultado.random;
+    //     conquerGame.usuario_id = req.uid;
+    //     conquerGame.tipoJuego = req.body.tipoJuego;
+    //     conquerGame.estatus = CONQUERGAMEPARTIDA.LOBBY;
+    //     conquerGame.cantidadJugadores = req.body.cantidadJugadores;
+    //     conquerGame.jugadores.push({...(req.usuarioLogueado),turno:JUGADORESARREGLO[0]});  
+    //     // usuario.numeroPartidaActual = vResultado.random;
+    //     await Promise.all([
+    //         conquerGame.save(),
+    // //         usuario.save()
+    //     ]);
+    //     crearRequest(getFuncName(),JSON.stringify(req.body),200);
+    //     return res.json({
+    //         ok: true,
+    //         data:conquerGame
+    //     });
+    // }catch(error){
+    //     crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
+    //     // if(nNumeroError === 530){
+    //     //     let vResultadoE = {}
+    //     //     vResultadoE.numeroPartida = numeroPartida;
+    //     //     vResultadoE.existe = true;
+    //     //     res.json({
+    //     //         message: 'La partida ya existe',
+    //     //         data:vResultadoE
+    //     //     });
+    //     // }else{
+    //         res.status(nNumeroError).json({
+    //             ok: false,
+    //             data: error.toString(),
+    //         });
+    //     // }
+    // }
+    res.json({});
 }
 
 exports.buscarPartidas =  async (req,res) =>{
-    try{
-        const partida = await ConquerGame.aggregate([
-            {
-                $match:{
-                    estatus:CONQUERGAMEPARTIDA.LOBBY
-                }
-            },     
-            {
-                $lookup: {
-                    from: 'usuario',
-                    localField: 'usuario_id',
-                    foreignField: '_id',
-                    pipeline: [
-                        {
-                            '$project': {
-                                'usuario': 1
-                            }
-                        }
-                    ],
-                    as: 'usuarios'
-                }
-            },
-            {
-                '$unwind': '$usuarios'
-            },
-            {
-                '$project': {
-                    'id':'$_id',
-                    'cantidadJugadores':1,
-                    'tipoJuego':1,
-                    'usuarios.usuario':1
-                }
-            },
-        ])
+    // try{
+    //     const partida = await ConquerGame.aggregate([
+    //         {
+    //             $match:{
+    //                 estatus:CONQUERGAMEPARTIDA.LOBBY
+    //             }
+    //         },     
+    //         {
+    //             $lookup: {
+    //                 from: 'usuario',
+    //                 localField: 'usuario_id',
+    //                 foreignField: '_id',
+    //                 pipeline: [
+    //                     {
+    //                         '$project': {
+    //                             'usuario': 1
+    //                         }
+    //                     }
+    //                 ],
+    //                 as: 'usuarios'
+    //             }
+    //         },
+    //         {
+    //             '$unwind': '$usuarios'
+    //         },
+    //         {
+    //             '$project': {
+    //                 'id':'$_id',
+    //                 'cantidadJugadores':1,
+    //                 'tipoJuego':1,
+    //                 'usuarios.usuario':1
+    //             }
+    //         },
+    //     ])
 
-        crearRequest(getFuncName(),JSON.stringify(req.body),200);
-        return res.json({
-            ok: true,
-            data:partida
-        });
-    }catch(error){
-        crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
-        res.status(500).json({
-            ok: false,
-            data: error.toString()
-        });
-    }
+    //     crearRequest(getFuncName(),JSON.stringify(req.body),200);
+    //     return res.json({
+    //         ok: true,
+    //         data:partida
+    //     });
+    // }catch(error){
+    //     crearRequest(getFuncName(),JSON.stringify(req.body),500,error.toString());
+    //     res.status(500).json({
+    //         ok: false,
+    //         data: error.toString()
+    //     });
+    // }
+    res.json({});
+        //         ok: true,
+        //         data:partida
+        //     });
 }
 
 

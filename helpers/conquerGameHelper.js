@@ -1,34 +1,34 @@
-const Partida = require("../models/ConquerGame");
+const Partida = require("../src/data/mongo/models/ConquerGame");
 const { CONQUERGAMEPARTIDA } = require("../types/conquerGameType");
 
-exports.generarPartida = async() => {
+exports.generarPartida = async () => {
     let random = 0;
     let bCumple = false;
-    while(!bCumple){
+    while (!bCumple) {
         random = Math.floor(Math.random() * (10000 - 1000) + 1000);
-        if(!(await validaPartidaExistente(random)) > 0) {
+        if (!(await validaPartidaExistente(random)) > 0) {
             return random
         }
     }
     return random;
 }
 
-const validaPartidaExistente = async(numeroPartida) =>{
-    try{
+const validaPartidaExistente = async (numeroPartida) => {
+    try {
         const partida = await Partida.findOne({
             numeroPartida,
-            estatus:{
-                $nin:[
+            estatus: {
+                $nin: [
                     CONQUERGAMEPARTIDA.FINALIZADO,
                     CONQUERGAMEPARTIDA.CANCELADO
                 ]
             }
         });
-        if(!partida) {
+        if (!partida) {
             return false;
         }
         return true;
-    }catch(error){
+    } catch (error) {
         return false;
     }
 }

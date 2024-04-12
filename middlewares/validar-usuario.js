@@ -1,6 +1,6 @@
 const { crearRequest } = require("../helpers/request");
 const { getFuncName } = require('../helpers/getFuncName');
-const Usuario = require("../models/Usuario");
+const Usuario = require("../src/data/mongo/models/Usuario");
 const { convertirMongoAJson } = require("../helpers/convertirMongoJson");
 const bcrypt = require('bcryptjs')
 
