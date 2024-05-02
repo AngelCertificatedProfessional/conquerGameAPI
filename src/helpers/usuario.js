@@ -1,6 +1,6 @@
-const usuarioModel = require('../src/data/mongo/models/Usuario')
-const usuariosBloqueadosModel = require('../src/data/mongo/models/UsuariosBloqueados');
-const { convertirMongoAJson } = require("../helpers/convertirMongoJson");
+const usuarioModel = require('../data/mongo/models/Usuario.model')
+const usuariosBloqueadosModel = require('../data/mongo/models/UsuariosBloqueados.model');
+const { convertirMongoAJson } = require("./convertirMongoJson");
 //Validaremos que el usuario no pueda registrarse repetidas veces como tambien que no utilize nombres inpropios
 exports.validaUsuario = async (usuario, nId, correo) => {
     if (nId === undefined || nId === null) {

@@ -1,3 +1,30 @@
+import { Request, Response } from "express"
+import { CustomError } from "../../../domain"
+import { AgregarUsuarioInvitado } from "../../../domain/use-cases/usuario"
+import { handleError } from "../../handleError/handleError"
+export class UsuarioController {
+    constructor(
+    ) { }
+
+    agregarUsuarioInvitado = async (req: Request, res: Response) => {
+        const agregarUsuarioInvitado = new AgregarUsuarioInvitado()
+        agregarUsuarioInvitado.execute(req.body)
+            .then(category => res.status(201).json(category))
+            .catch(error => handleError(error, res))
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 // const { getFuncName } = require("../../../helpers/getFuncName");
 // const { crearRequest } = require("../helpers/request");
 // const { validaUsuario } = require("../../../helpers/usuario");
@@ -8,7 +35,7 @@
 // const UsuariosBloqueados = require('../models/UsuariosBloqueados');
 // const { convertirMongoAJson } = require('../utils/utils');
 
-const { agregarUsuarioInvitado } = require("../../domain/use-cases/usuario/agregarUsuarioInvitado");
+// const { agregarUsuarioInvitado } = require("../../../domain/use-cases/usuario/agregarUsuarioInvitado");
 
 // exports.agregarUsuarioLocal =  async (req,res) =>{
 //     try{
@@ -36,10 +63,10 @@ const { agregarUsuarioInvitado } = require("../../domain/use-cases/usuario/agreg
 //     }
 // }
 
-exports.agregarUsuarioInvitado = (req,res) =>{
-    agregarUsuarioInvitado(req).then(todos => res.json(todos))
-    .catch(error => res.status(400).json({ error }))
-}
+// exports.agregarUsuarioInvitado = (req,res) =>{
+//     agregarUsuarioInvitado(req).then(todos => res.json(todos))
+//     .catch(error => res.status(400).json({ error }))
+// }
 
 // exports.iniciarSecion = async(req,res) => {
 //     try{

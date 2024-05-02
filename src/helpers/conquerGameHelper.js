@@ -1,5 +1,5 @@
-const Partida = require("../src/data/mongo/models/ConquerGame");
-const { CONQUERGAMEPARTIDA } = require("../types/conquerGameType");
+const Partida = require("../data/mongo/models/ConquerGame");
+const { CONQUERGAMEPARTIDA } = require("../../types/conquerGameType");
 
 exports.generarPartida = async () => {
     let random = 0;
