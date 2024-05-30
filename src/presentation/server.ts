@@ -8,27 +8,31 @@ interface Options {
 }
 
 export class Server {
-    private app = express();
+    public readonly app = express();
     private readonly port: number;
-    private server: any;
 
     constructor(options: Options) {
         const { port } = options;
         this.port = port;
+        this.configure()
     }
 
-    async start() {
+    private configure() {
         //Cors
         this.app.use(cors());
         this.app.use(express.json());
         this.app.use(compression())
         this.app.use(express.static('public'));
-        this.server = require('http').createServer(this.app);
+        // this.server = require('http').createServer(this.app);
 
         // /*Seccion de sockets*/
         //this.socket = require('../sockets/controller'); 
         //sockets
         //this.sockets();
+
+    }
+
+    async start() {
         this.app.listen(this.port, () => {
             console.log(`Servidor Corriendo en el puerto ${process.env.PORT}`)
         });
