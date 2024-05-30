@@ -5,19 +5,16 @@ import compression from 'compression'
 
 interface Options {
     port: number;
-    routes: Router;
 }
 
 export class Server {
     private app = express();
     private readonly port: number;
-    private readonly routes: Router;
     private server: any;
 
     constructor(options: Options) {
-        const { port, routes } = options;
+        const { port } = options;
         this.port = port;
-        this.routes = routes;
     }
 
     async start() {
@@ -28,9 +25,6 @@ export class Server {
         this.app.use(express.static('public'));
         this.server = require('http').createServer(this.app);
 
-        //*Routes
-        this.app.use(this.routes)
-
         // /*Seccion de sockets*/
         //this.socket = require('../sockets/controller'); 
         //sockets
@@ -38,6 +32,10 @@ export class Server {
         this.app.listen(this.port, () => {
             console.log(`Servidor Corriendo en el puerto ${process.env.PORT}`)
         });
+    }
+
+    public setRoutes(router: Router) {
+        this.app.use(router);
     }
 
     // sockets() {

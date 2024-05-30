@@ -1,4 +1,3 @@
-// import { Request } from "express";
 const bcrypt = require('bcryptjs');
 import { UsuarioModel } from "../../../data";
 import { convertirMongoAJson } from "../../../helpers/convertirMongoJson";
@@ -7,13 +6,6 @@ import { generarJWT } from "../../../helpers/jwt";
 import { crearRequest } from "../../../infraestructure/datasource/request/crearRequest";
 import { CustomError } from "../../errors/curstom.error";
 import { ValidaExisteUsuario } from "./validaExisteUsuario";
-
-// const { getFuncName } = require('../../../helpers/getFuncName')
-// const { crearRequest } = require('../request/crearRequest')
-// const { validaExisteUsuario } = require('./validaExisteUsuario')
-// const usuarioModel = require('../../../data/mongo/models/Usuario.model')
-// const { generarJWT } = require("../../../helpers/jwt");
-
 export class AgregarUsuarioInvitado {
     constructor() {
 
@@ -53,13 +45,7 @@ export class AgregarUsuarioInvitado {
                 usuario: usuario.usuario
             }
         } catch (error) {
-            console.log(error)
             throw CustomError.internalServer(`${error}`, getFuncName(), JSON.stringify(body))
-            // crearRequest(getFuncName(), JSON.stringify(req.body), 500, error.toString());
-            // throw {
-            //     error: 'Algo salio mal',
-            //     data: error.toString()
-            // }
         }
     }
 }
