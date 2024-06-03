@@ -8,7 +8,7 @@ export const crearRequest = async (proceso: string[], req: String, estatus: Numb
     try {
         new RequestModel({
             proceso: proceso[0],
-            archivo: proceso[1],
+            archivo: proceso[1] || 'N/A',
             estatus,
             request: req,
             error,

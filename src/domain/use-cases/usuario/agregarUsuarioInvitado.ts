@@ -37,12 +37,13 @@ export class AgregarUsuarioInvitado {
             usuario.rol = 2;
             const resultado = convertirMongoAJson((await usuario.save()))
             const token = await generarJWT(resultado._id, usuario.usuario);
-            resultado.contrasena = 'invitado' + vResultado.random
-            resultado.uid = resultado._id
+            // resultado.contrasena = 'invitado' + vResultado.random
+            // resultado.uid = resultado._id
             crearRequest(getFuncName(), JSON.stringify(body), 200);
             return {
                 token,
-                usuario: usuario.usuario
+                usuario: usuario.usuario,
+                uid: resultado._id
             }
         } catch (error) {
             throw CustomError.internalServer(`${error}`, getFuncName(), JSON.stringify(body))
