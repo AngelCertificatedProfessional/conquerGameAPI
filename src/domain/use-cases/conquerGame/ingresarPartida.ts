@@ -37,7 +37,7 @@ export class IngresarPartida {
                     numeroPartidaActual: conquerGame.numeroPartida
                 })
             ]);
-            this.ioSocketService.sendMessage('conquerGame' + conquerGame.numeroPartida,
+            this.ioSocketService.sendMessage(`conquerGame${conquerGame.numeroPartida}Lobby`,
                 convertirMongoAJson(conquerGameMongo!));
             crearRequest(getFuncName(), JSON.stringify(body), 200);
             return {

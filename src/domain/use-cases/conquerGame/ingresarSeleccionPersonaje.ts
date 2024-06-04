@@ -21,7 +21,7 @@ export class IngresarSeleccionPersonaje {
             }, {
                 new: true
             })
-            this.ioSocketService.sendMessage(`conquerGame${conquerGame.numeroPartida}`,
+            this.ioSocketService.sendMessage(`conquerGame${conquerGame.numeroPartida}IngresarSeleccionPersonaje`,
                 convertirMongoAJson(conquerGame!));
             crearRequest(getFuncName(), JSON.stringify(body), 200);
             return {
