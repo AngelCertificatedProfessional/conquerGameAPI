@@ -35,7 +35,8 @@ export class CrearPartida {
             crearRequest(getFuncName(), JSON.stringify(body), 200);
             return {
                 ok: true,
-                data: convertirMongoAJson(conquerGame)
+                data: convertirMongoAJson(conquerGame),
+                turnoJugador: JUGADORESARREGLO[0]
             };
         } catch (error) {
             console.log(error)

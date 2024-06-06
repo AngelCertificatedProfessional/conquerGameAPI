@@ -42,7 +42,8 @@ export class IngresarPartida {
             crearRequest(getFuncName(), JSON.stringify(body), 200);
             return {
                 ok: true,
-                data: convertirMongoAJson(conquerGameMongo!)
+                data: convertirMongoAJson(conquerGameMongo!),
+                turnoJugador: JUGADORESARREGLO[conquerGame.jugadores.length]
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`, getFuncName(), JSON.stringify(body))
