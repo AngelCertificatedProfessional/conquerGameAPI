@@ -15,8 +15,10 @@ export class ConquerGameRoutes {
         router.use(validarSesionUsuario)
         router.get('/buscarPartidas', controller.buscarPartida)
         router.post('/crearPartida', controller.crearPartida)
-        router.patch(`/ingresarPartida/:_id`, [validaExistePartida, validaNoSobrePasarCantidadJugadores], controller.ingresarPartida);
+        router.patch(`/ingresarLobbyPartida/:_id`, [validaExistePartida, validaNoSobrePasarCantidadJugadores], controller.ingresarLobbyPartida);
         router.patch(`/ingresarSeleccionPersonaje/:_id`, [validaExistePartida, validaFaltaCantidadJugadores], controller.ingresarSeleccionPersonaje);
+        router.patch(`/indicarJugadorListo/:_id`, [validaExistePartida], controller.indicarJugadorListo);
+        router.patch(`/iniciarPartida/:_id`, [validaExistePartida], controller.iniciarPartida);
         return router;
     }
 }

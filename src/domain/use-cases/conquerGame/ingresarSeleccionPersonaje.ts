@@ -16,11 +16,16 @@ export class IngresarSeleccionPersonaje {
 
     public async execute(body: any, params: any) {
         try {
-            const conquerGame: any = await ConquerGameModel.findOneAndUpdate({ _id: params._id }, {
-                estatus: CONQUERGAMEPARTIDA.AGREGARPIEZASTABLERO
-            }, {
-                new: true
-            })
+            const conquerGame: any = await ConquerGameModel.findOneAndUpdate(
+                {
+                    _id: params._id
+                },
+                {
+                    estatus: CONQUERGAMEPARTIDA.AGREGARPIEZASTABLERO
+                },
+                {
+                    new: true
+                })
             this.ioSocketService.sendMessage(`conquerGame${conquerGame.numeroPartida}IngresarSeleccionPersonaje`,
                 convertirMongoAJson(conquerGame!));
             crearRequest(getFuncName(), JSON.stringify(body), 200);

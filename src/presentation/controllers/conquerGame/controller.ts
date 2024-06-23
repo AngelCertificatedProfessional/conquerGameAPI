@@ -1,5 +1,8 @@
 import { Request, Response } from "express"
-import { BuscarPartida, CrearPartida, IngresarPartida, IngresarSeleccionPersonaje } from "../../../domain/use-cases/conquerGame"
+import {
+    BuscarPartida, CrearPartida, IndicarJugadorListo,
+    IngresarLobbyPartida, IngresarSeleccionPersonaje, IniciarPartida
+} from "../../../domain/use-cases/conquerGame"
 import { handleError } from "../../handleError/handleError"
 export class ConquerGameController {
     constructor(
@@ -19,9 +22,9 @@ export class ConquerGameController {
             .catch(error => handleError(error, res))
     }
 
-    ingresarPartida = async (req: Request, res: Response) => {
-        const ingresarPartida = new IngresarPartida()
-        ingresarPartida.execute(req.body, req.headers, req.params)
+    ingresarLobbyPartida = async (req: Request, res: Response) => {
+        const ingresarLobbyPartida = new IngresarLobbyPartida()
+        ingresarLobbyPartida.execute(req.body, req.headers, req.params)
             .then(partida => res.status(201).json(partida))
             .catch(error => handleError(error, res))
     }
@@ -29,6 +32,20 @@ export class ConquerGameController {
     ingresarSeleccionPersonaje = async (req: Request, res: Response) => {
         const ingresarSeleccionPersonaje = new IngresarSeleccionPersonaje()
         ingresarSeleccionPersonaje.execute(req.body, req.params)
+            .then(partida => res.status(201).json(partida))
+            .catch(error => handleError(error, res))
+    }
+
+    indicarJugadorListo = async (req: Request, res: Response) => {
+        const indicarJugadorListo = new IndicarJugadorListo()
+        indicarJugadorListo.execute(req.body, req.headers, req.params)
+            .then(partida => res.status(201).json(partida))
+            .catch(error => handleError(error, res))
+    }
+
+    iniciarPartida = async (req: Request, res: Response) => {
+        const iniciarPartida = new IniciarPartida()
+        iniciarPartida.execute(req.body, req.params)
             .then(partida => res.status(201).json(partida))
             .catch(error => handleError(error, res))
     }
