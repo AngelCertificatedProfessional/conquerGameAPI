@@ -15,13 +15,17 @@ export class IndicarJugadorListo {
 
     public async execute(body: any, headers: any, params: any) {
         try {
+            const { piezasJugador } = body;
             const conquerGame: any = await ConquerGameModel.findOneAndUpdate(
                 {
                     _id: params._id,
                     "jugadores._id": headers.uid
                 },
                 {
-                    "jugadores.$.listo": true
+                    "jugadores.$.listo": true,
+                    "$push": {
+                        posicionPiezasGlobal: { "$each": piezasJugador }
+                    }
                 },
                 {
                     new: true

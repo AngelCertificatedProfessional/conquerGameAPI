@@ -26,7 +26,7 @@ export class IngresarLobbyPartida {
                     $push: {
                         jugadores: {
                             ...convertirMongoAJson(headers.usuarioLogueado),
-                            turno: JUGADORESARREGLO[conquerGame.jugadores.length]
+                            // turno: JUGADORESARREGLO[conquerGame.jugadores.length]
                         }
                     }
                 }, {
@@ -43,7 +43,6 @@ export class IngresarLobbyPartida {
             return {
                 ok: true,
                 data: convertirMongoAJson(conquerGameMongo!),
-                turnoJugador: JUGADORESARREGLO[conquerGame.jugadores.length]
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`, getFuncName(), JSON.stringify(body))

@@ -23,7 +23,7 @@ export class CrearPartida {
             conquerGame.tipoJuego = body.tipoJuego;
             conquerGame.cantidadJugadores = body.cantidadJugadores;
             conquerGame.estatus = CONQUERGAMEPARTIDA.LOBBY;
-            conquerGame.jugadores.push({ ...(headers.usuarioLogueado), turno: JUGADORESARREGLO[0] });
+            conquerGame.jugadores.push({ ...(headers.usuarioLogueado) });
             await Promise.all([
                 conquerGame.save(),
                 //Actualizamos al usuario para asignarle el numero de partida que esta jugando
@@ -35,8 +35,7 @@ export class CrearPartida {
             crearRequest(getFuncName(), JSON.stringify(body), 200);
             return {
                 ok: true,
-                data: convertirMongoAJson(conquerGame),
-                turnoJugador: JUGADORESARREGLO[0]
+                data: convertirMongoAJson(conquerGame)
             };
         } catch (error) {
             console.log(error)

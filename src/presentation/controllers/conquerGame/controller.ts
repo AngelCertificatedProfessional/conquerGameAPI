@@ -31,7 +31,7 @@ export class ConquerGameController {
 
     ingresarSeleccionPersonaje = async (req: Request, res: Response) => {
         const ingresarSeleccionPersonaje = new IngresarSeleccionPersonaje()
-        ingresarSeleccionPersonaje.execute(req.body, req.params)
+        ingresarSeleccionPersonaje.execute(req.body, req.headers, req.params)
             .then(partida => res.status(201).json(partida))
             .catch(error => handleError(error, res))
     }

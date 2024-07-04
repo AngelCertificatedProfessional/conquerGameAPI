@@ -2,9 +2,10 @@ import { CustomError } from "../../errors/curstom.error";
 import { getFuncName } from "../../../helpers/getFuncName";
 import { crearRequest } from "../../../infraestructure/datasource/request/crearRequest";
 import { ConquerGameModel } from "../../../data";
-import { CONQUERGAMEPARTIDA } from "../../../infraestructure/types/conquerGame.type";
+import { CONQUERGAMEPARTIDA, JUGADORESARREGLO } from "../../../infraestructure/types/conquerGame.type";
 import { convertirMongoAJson } from "../../../helpers/convertirMongoJson";
 import { IoSocketService } from "../../../infraestructure/sockets/iosocket.service";
+import { ConquerGameInterface } from "../../../infraestructure/interfaces/conquerGame.interface";
 
 export class IngresarSeleccionPersonaje {
 
@@ -14,20 +15,35 @@ export class IngresarSeleccionPersonaje {
 
     }
 
-    public async execute(body: any, params: any) {
+    public async execute(body: any, headers: any, params: any) {
         try {
-            const conquerGame: any = await ConquerGameModel.findOneAndUpdate(
+            let conquerGame: ConquerGameInterface = headers.conquerGame;
+            // conquerGame.jugadores.length;
+            // conquerGame = 
+            // Mezclar el arreglo de turnos únicos
+            const turnosUnicos = this.shuffleArray([...JUGADORESARREGLO], conquerGame.cantidadJugadores);
+            conquerGame.jugadores.forEach((arr, index) => {
+                conquerGame.jugadores[index].turno = turnosUnicos[index];
+            })
+
+            conquerGame.jugadores.sort((a, b) => {
+                return JUGADORESARREGLO.indexOf(a.turno) - JUGADORESARREGLO.indexOf(b.turno);
+            });
+
+            // turno: JUGADORESARREGLO[conquerGame.jugadores.length]
+            const conquerGameMongo: any = await ConquerGameModel.findOneAndUpdate(
                 {
                     _id: params._id
                 },
                 {
-                    estatus: CONQUERGAMEPARTIDA.AGREGARPIEZASTABLERO
+                    estatus: CONQUERGAMEPARTIDA.AGREGARPIEZASTABLERO,
+                    jugadores: conquerGame.jugadores
                 },
                 {
                     new: true
                 })
-            this.ioSocketService.sendMessage(`conquerGame${conquerGame.numeroPartida}IngresarSeleccionPersonaje`,
-                convertirMongoAJson(conquerGame!));
+            this.ioSocketService.sendMessage(`conquerGame${conquerGameMongo.numeroPartida}IngresarSeleccionPersonaje`,
+                convertirMongoAJson(conquerGameMongo!));
             crearRequest(getFuncName(), JSON.stringify(body), 200);
             return {
                 ok: true
@@ -36,4 +52,13 @@ export class IngresarSeleccionPersonaje {
             throw CustomError.internalServer(`${error}`, getFuncName(), JSON.stringify(body))
         }
     }
+
+    private shuffleArray = (arreglo: string[], cantidadJugadores: number): string[] => {
+        for (let i = cantidadJugadores - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arreglo[i], arreglo[j]] = [arreglo[j], arreglo[i]];
+        }
+        return arreglo;
+    }
+
 }
