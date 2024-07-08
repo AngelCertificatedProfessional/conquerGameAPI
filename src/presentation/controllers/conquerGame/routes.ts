@@ -19,6 +19,7 @@ export class ConquerGameRoutes {
         router.patch(`/ingresarSeleccionPersonaje/:_id`, [validaExistePartida, validaFaltaCantidadJugadores], controller.ingresarSeleccionPersonaje);
         router.patch(`/indicarJugadorListo/:_id`, [validaExistePartida], controller.indicarJugadorListo);
         router.patch(`/iniciarPartida/:_id`, [validaExistePartida], controller.iniciarPartida);
+        router.patch(`/moverPosicionPiezasGlobal/:_id`, [validaExistePartida], controller.moverPosicionPiezasGlobal);
         return router;
     }
 }

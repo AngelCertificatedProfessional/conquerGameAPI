@@ -40,21 +40,14 @@ const ConquerGameSchema = new mongoose.Schema({
         required: false
     },
     turno: {
-        type: Number,
+        type: String,
         required: false,
-        emun: [0, 1, 2, 3, 4, 5, 6] //Representa a los 6 jugadores
+        emun: JUGADORESARREGLO //Representa a los 6 jugadores
     },
     ganador: {
         type: String,
         required: false,
-        emun: [
-            JUGADORESARREGLO[0],
-            JUGADORESARREGLO[1],
-            JUGADORESARREGLO[2],
-            JUGADORESARREGLO[3],
-            JUGADORESARREGLO[4],
-            JUGADORESARREGLO[5]
-        ] //Representa a los 6 jugadores
+        emun: JUGADORESARREGLO //Representa a los 6 jugadores
     },
     creadoEl: {
         type: Date,
@@ -70,6 +63,10 @@ const ConquerGameSchema = new mongoose.Schema({
         required: false
     },
     historialJugadores: {
+        type: Array,
+        required: false
+    },
+    reyesVivos: {
         type: Array,
         required: false
     }

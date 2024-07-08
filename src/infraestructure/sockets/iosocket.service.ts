@@ -33,7 +33,6 @@ export class IoSocketService {
     }
 
     public sendMessage(type: string, payload: Object) {
-        console.log(type, payload)
         this.io.emit(type, payload)
     }
 

@@ -1,7 +1,8 @@
 import { Request, Response } from "express"
 import {
     BuscarPartida, CrearPartida, IndicarJugadorListo,
-    IngresarLobbyPartida, IngresarSeleccionPersonaje, IniciarPartida
+    IngresarLobbyPartida, IngresarSeleccionPersonaje, IniciarPartida,
+    MoverPosicionPiezasGlobal
 } from "../../../domain/use-cases/conquerGame"
 import { handleError } from "../../handleError/handleError"
 export class ConquerGameController {
@@ -45,7 +46,14 @@ export class ConquerGameController {
 
     iniciarPartida = async (req: Request, res: Response) => {
         const iniciarPartida = new IniciarPartida()
-        iniciarPartida.execute(req.body, req.params)
+        iniciarPartida.execute(req.body, req.headers, req.params)
+            .then(partida => res.status(201).json(partida))
+            .catch(error => handleError(error, res))
+    }
+
+    moverPosicionPiezasGlobal = async (req: Request, res: Response) => {
+        const moverPosicionPiezasGlobal = new MoverPosicionPiezasGlobal()
+        moverPosicionPiezasGlobal.execute(req.body, req.params)
             .then(partida => res.status(201).json(partida))
             .catch(error => handleError(error, res))
     }

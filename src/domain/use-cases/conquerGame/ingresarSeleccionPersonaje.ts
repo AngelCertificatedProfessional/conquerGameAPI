@@ -18,19 +18,16 @@ export class IngresarSeleccionPersonaje {
     public async execute(body: any, headers: any, params: any) {
         try {
             let conquerGame: ConquerGameInterface = headers.conquerGame;
-            // conquerGame.jugadores.length;
-            // conquerGame = 
             // Mezclar el arreglo de turnos únicos
             const turnosUnicos = this.shuffleArray([...JUGADORESARREGLO], conquerGame.cantidadJugadores);
             conquerGame.jugadores.forEach((arr, index) => {
-                conquerGame.jugadores[index].turno = turnosUnicos[index];
+                conquerGame.jugadores[index].turnoJugador = turnosUnicos[index];
             })
 
             conquerGame.jugadores.sort((a, b) => {
-                return JUGADORESARREGLO.indexOf(a.turno) - JUGADORESARREGLO.indexOf(b.turno);
+                return JUGADORESARREGLO.indexOf(a.turnoJugador) - JUGADORESARREGLO.indexOf(b.turnoJugador);
             });
 
-            // turno: JUGADORESARREGLO[conquerGame.jugadores.length]
             const conquerGameMongo: any = await ConquerGameModel.findOneAndUpdate(
                 {
                     _id: params._id

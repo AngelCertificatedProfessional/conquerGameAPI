@@ -4,7 +4,8 @@ import { crearRequest } from "../../../infraestructure/datasource/request/crearR
 import { ConquerGameModel } from "../../../data";
 import { convertirMongoAJson } from "../../../helpers/convertirMongoJson";
 import { IoSocketService } from "../../../infraestructure/sockets/iosocket.service";
-import { CONQUERGAMEPARTIDA } from "../../../infraestructure/types/conquerGame.type";
+import { CONQUERGAMEPARTIDA, JUGADORESARREGLO } from "../../../infraestructure/types/conquerGame.type";
+import { ConquerGameInterface } from "../../../infraestructure/interfaces/conquerGame.interface";
 
 export class IniciarPartida {
 
@@ -14,25 +15,31 @@ export class IniciarPartida {
 
     }
 
-    public async execute(body: any, params: any) {
+    public async execute(body: any, headers: any, params: any) {
         try {
-            const conquerGame: any = await ConquerGameModel.findOneAndUpdate(
+            let conquerGame: ConquerGameInterface = headers.conquerGame;
+            const conquerGameMongo: any = await ConquerGameModel.findOneAndUpdate(
                 {
                     _id: params._id,
                 },
                 {
-                    estatus: CONQUERGAMEPARTIDA.JUEGOINICIADO
+                    estatus: CONQUERGAMEPARTIDA.JUEGOINICIADO,
+                    turno: JUGADORESARREGLO[0], //primer turno de jugador 
+                    reyesVivos: conquerGame.cantidadJugadores === 2 ?
+                        JUGADORESARREGLO.slice(0, 2) :
+                        JUGADORESARREGLO.slice(0, 4)
                 },
                 {
                     new: true
                 })
-            this.ioSocketService.sendMessage(`conquerGame${conquerGame.numeroPartida}IniciarPartida`,
-                convertirMongoAJson(conquerGame!));
+            this.ioSocketService.sendMessage(`conquerGame${conquerGameMongo.numeroPartida}IniciarPartida`,
+                convertirMongoAJson(conquerGameMongo!));
             crearRequest(getFuncName(), JSON.stringify(body), 200);
             return {
                 ok: true
             };
         } catch (error) {
+            console.log(error)
             throw CustomError.internalServer(`${error}`, getFuncName(), JSON.stringify(body))
         }
     }
