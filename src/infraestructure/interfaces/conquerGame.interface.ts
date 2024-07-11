@@ -1,8 +1,4 @@
-interface jugador {
-    invitado: Boolean;
-    turnoJugador: string;
-    usuario: string
-}
+import { UsuarioInterface } from "./usuario.interface";
 
 interface posicionPiezasGlobal {
     nombre: string;
@@ -12,7 +8,7 @@ interface posicionPiezasGlobal {
 }
 
 export interface ConquerGameInterface {
-    jugadores: jugador[];
+    jugadores: UsuarioInterface[];
     numeroPartida: number;
     tipoJuego: number;
     cantidadJugadores: number;

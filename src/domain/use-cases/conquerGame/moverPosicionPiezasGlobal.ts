@@ -5,7 +5,7 @@ import { ConquerGameModel } from "../../../data";
 import { convertirMongoAJson } from "../../../helpers/convertirMongoJson";
 import { IoSocketService } from "../../../infraestructure/sockets/iosocket.service";
 import { CONQUERGAMEPARTIDA } from "../../../infraestructure/types/conquerGame.type";
-import { ConquerGameInterface } from "../../../infraestructure/interfaces/conquerGame.interface";
+import { ConquerGameInterface } from "../../../infraestructure/interfaces";
 
 export class MoverPosicionPiezasGlobal {
 
@@ -16,6 +16,7 @@ export class MoverPosicionPiezasGlobal {
     }
 
     public async execute(body: any, params: any) {
+        const posicionPiezaGlobal = body.posicionPiezasGlobal
         try {
             const conquerGame: ConquerGameInterface = await ConquerGameModel.findOneAndUpdate(
                 {
@@ -25,10 +26,14 @@ export class MoverPosicionPiezasGlobal {
                     posicionPiezasGlobal: body.posicionPiezasGlobal,
                     turno: body.siguienteTurno,
                     reyesVivos: body.reyesVivos,
-                    estatus: body.reyesVivos.length === 1 ? CONQUERGAMEPARTIDA.FINALIZADO : CONQUERGAMEPARTIDA.JUEGOINICIADO
+                    estatus: body.reyesVivos.length === 1 ? CONQUERGAMEPARTIDA.FINALIZADO : CONQUERGAMEPARTIDA.JUEGOINICIADO,
+                    $push: {
+                        historialJugadores: posicionPiezaGlobal
+                    }
                 },
                 {
-                    new: true
+                    new: true,
+                    fields: { historialJugadores: 0 }
                 }) as ConquerGameInterface;
             //Si existe solo un rey vivo
             if (body.reyesVivos.length === 1) {

@@ -16,6 +16,7 @@ export class CrearPartida {
             // todo una nueva partida
 
             const nRandom: number = await generaNumeroPartida.execute()
+            const { usuarioLogueado } = headers;
             //Se arma segmento para el lado de la partida
             const conquerGame = new ConquerGameModel()
             conquerGame.numeroPartida = nRandom;
@@ -23,7 +24,12 @@ export class CrearPartida {
             conquerGame.tipoJuego = body.tipoJuego;
             conquerGame.cantidadJugadores = body.cantidadJugadores;
             conquerGame.estatus = CONQUERGAMEPARTIDA.LOBBY;
-            conquerGame.jugadores.push({ ...(headers.usuarioLogueado) });
+            conquerGame.jugadores.push({
+                _id: usuarioLogueado._id,
+                puntuaje: usuarioLogueado.puntuaje,
+                usuario: usuarioLogueado.usuario,
+                nombre: usuarioLogueado.usuario,
+            });
             await Promise.all([
                 conquerGame.save(),
                 //Actualizamos al usuario para asignarle el numero de partida que esta jugando

@@ -2,10 +2,9 @@ import { CustomError } from "../../errors/curstom.error";
 import { getFuncName } from "../../../helpers/getFuncName";
 import { crearRequest } from "../../../infraestructure/datasource/request/crearRequest";
 import { ConquerGameModel, UsuarioModel } from "../../../data";
-import { JUGADORESARREGLO } from "../../../infraestructure/types/conquerGame.type";
 import { convertirMongoAJson } from "../../../helpers/convertirMongoJson";
 import { IoSocketService } from "../../../infraestructure/sockets/iosocket.service";
-import { ConquerGameInterface } from "../../../infraestructure/interfaces/conquerGame.interface";
+import { ConquerGameInterface, UsuarioInterface } from "../../../infraestructure/interfaces";
 
 export class IngresarLobbyPartida {
 
@@ -17,6 +16,7 @@ export class IngresarLobbyPartida {
 
     public async execute(body: any, headers: any, params: any) {
         try {
+            const usuarioLogueado: UsuarioInterface = headers.usuarioLogueado;
             const conquerGame: ConquerGameInterface = headers.conquerGame;
             // Todo Agregar validacion de pertenece a la partida
 
@@ -25,8 +25,10 @@ export class IngresarLobbyPartida {
                 ConquerGameModel.findOneAndUpdate({ _id: params._id }, {
                     $push: {
                         jugadores: {
-                            ...convertirMongoAJson(headers.usuarioLogueado),
-                            // turno: JUGADORESARREGLO[conquerGame.jugadores.length]
+                            _id: usuarioLogueado._id,
+                            puntuaje: usuarioLogueado.puntuaje,
+                            usuario: usuarioLogueado.usuario,
+                            nombre: usuarioLogueado.usuario,
                         }
                     }
                 }, {
