@@ -55,15 +55,12 @@ export class MoverPosicionPiezasGlobal {
                 }
                 this.ioSocketService.sendMessage(`conquerGame${conquerGame.numeroPartida}FinalizarPartida`,
                     { mensaje: `El ganador es el jugador ${mensajeF}` });
-            }
-            //Si existen varios reyes vivos
-            if (body.reyesVivos.length > 1) {
+            } else if (body.reyesVivos.length > 1) {
+                //Si existen varios reyes vivos
                 this.ioSocketService.sendMessage(`conquerGame${conquerGame.numeroPartida}MoverPosicionPiezasGlobal`,
                     convertirMongoAJson(conquerGame!));
             }
 
-            this.ioSocketService.sendMessage(`conquerGame${conquerGame.numeroPartida}MoverPosicionPiezasGlobal`,
-                convertirMongoAJson(conquerGame!));
             crearRequest(getFuncName(), JSON.stringify(body), 200);
             return {
                 ok: true
