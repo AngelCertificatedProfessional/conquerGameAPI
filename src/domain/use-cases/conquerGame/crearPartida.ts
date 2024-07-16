@@ -3,7 +3,7 @@ import { getFuncName } from "../../../helpers/getFuncName";
 import { crearRequest } from "../../../infraestructure/datasource/request/crearRequest";
 import { ConquerGameModel, UsuarioModel } from "../../../data";
 import { generaNumeroPartida } from "./generaNumeroPartida";
-import { CONQUERGAMEPARTIDA, JUGADORESARREGLO } from "../../../infraestructure/types/conquerGame.type";
+import { CONQUERGAMEPARTIDA } from "../../../infraestructure/types/conquerGame.type";
 import { convertirMongoAJson } from "../../../helpers/convertirMongoJson";
 export class CrearPartida {
     constructor() {

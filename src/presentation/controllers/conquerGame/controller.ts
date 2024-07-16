@@ -11,7 +11,7 @@ export class ConquerGameController {
 
     buscarPartida = async (req: Request, res: Response) => {
         const buscarPartida = new BuscarPartida()
-        buscarPartida.execute(req.body)
+        buscarPartida.execute()
             .then(partida => res.status(201).json(partida))
             .catch(error => handleError(error, res))
     }

@@ -8,7 +8,7 @@ export class BuscarPartida {
 
     }
 
-    public async execute(body: any) {
+    public async execute() {
         try {
             const partida = await ConquerGameModel.aggregate([
                 {
@@ -68,13 +68,13 @@ export class BuscarPartida {
                     }
                 },
             ])
-            crearRequest(getFuncName(), JSON.stringify(body), 200);
+            crearRequest(getFuncName(), '', 200);
             return {
                 ok: true,
                 data: partida
             };
         } catch (error) {
-            throw CustomError.internalServer(`${error}`, getFuncName(), JSON.stringify(body))
+            throw CustomError.internalServer(`${error}`, getFuncName(), '')
         }
     }
 }
