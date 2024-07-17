@@ -1,6 +1,8 @@
-import { param } from "express-validator";
+import { body } from "express-validator";
 import { validarCampos } from "../../../presentation/middlewares/validar-campos";
-export const atendidoDTO = [
-    param('_id').not().isEmpty().withMessage('El id es obligatorio'),
+import { ACCIONTIPOJUEGO } from "../../../infraestructure/types/conquerGame.type";
+export const crearPartida = [
+    body('tipoJuego').isIn([ACCIONTIPOJUEGO.INIDIVIDUAL]).withMessage('El tipoJuego es obligatorio'),
+    body('cantidadJugadores').isIn([2, 4]).withMessage('La cantidad de Jugadores es obligatorio'),
     validarCampos,
 ]

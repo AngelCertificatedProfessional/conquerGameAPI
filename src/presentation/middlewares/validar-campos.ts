@@ -7,7 +7,7 @@ import { validationResult } from "express-validator";
 export const validarCampos = async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        const customError = CustomError.internalServer(errors.mapped(), getFuncName(), JSON.stringify(req.body))
+        const customError = CustomError.internalServer(JSON.stringify(errors.mapped()), getFuncName(), JSON.stringify(req.body))
         return handleError(customError, res)
     }
     next();

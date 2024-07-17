@@ -4,6 +4,7 @@ export class CustomError extends Error {
         public readonly message: string,
         public readonly nombreFuncion: string[],
         public readonly request: string
+
     ) {
         super(message)
     }
