@@ -32,7 +32,7 @@ export class ConquerGameController {
 
     ingresarSeleccionPersonaje = async (req: Request, res: Response) => {
         const ingresarSeleccionPersonaje = new IngresarSeleccionPersonaje()
-        ingresarSeleccionPersonaje.execute(req.body, req.headers, req.params)
+        ingresarSeleccionPersonaje.execute(req.headers, req.params)
             .then(partida => res.status(201).json(partida))
             .catch(error => handleError(error, res))
     }
@@ -46,7 +46,7 @@ export class ConquerGameController {
 
     iniciarPartida = async (req: Request, res: Response) => {
         const iniciarPartida = new IniciarPartida()
-        iniciarPartida.execute(req.body, req.headers, req.params)
+        iniciarPartida.execute(req.headers, req.params)
             .then(partida => res.status(201).json(partida))
             .catch(error => handleError(error, res))
     }

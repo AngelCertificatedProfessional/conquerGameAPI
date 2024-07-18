@@ -15,7 +15,7 @@ export class IngresarSeleccionPersonaje {
 
     }
 
-    public async execute(body: any, headers: any, params: any) {
+    public async execute(headers: any, params: any) {
         try {
             let conquerGame: ConquerGameInterface = headers.conquerGame;
             // Mezclar el arreglo de turnos únicos
@@ -41,12 +41,12 @@ export class IngresarSeleccionPersonaje {
                 })
             this.ioSocketService.sendMessage(`conquerGame${conquerGameMongo.numeroPartida}IngresarSeleccionPersonaje`,
                 convertirMongoAJson(conquerGameMongo!));
-            crearRequest(getFuncName(), JSON.stringify(body), 200);
+            crearRequest(getFuncName(), '', 200);
             return {
                 ok: true
             };
         } catch (error) {
-            throw CustomError.internalServer(`${error}`, getFuncName(), JSON.stringify(body))
+            throw CustomError.internalServer(`${error}`, getFuncName(), '')
         }
     }
 

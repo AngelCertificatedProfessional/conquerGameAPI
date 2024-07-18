@@ -1,2 +1,6 @@
 export * from './crearPartida.dto'
 export * from './ingresarLobbyPartida.dto'
+export * from './indicarJugadorListo.dto'
+export * from './ingresarSeleccionPersonaje.dto'
+export * from './iniciarPartida.dto'
+export * from './moverPosicionPiezasGlobal.dto'
