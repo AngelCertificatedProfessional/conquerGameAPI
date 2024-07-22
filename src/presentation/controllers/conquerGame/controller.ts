@@ -53,7 +53,7 @@ export class ConquerGameController {
 
     moverPosicionPiezasGlobal = async (req: Request, res: Response) => {
         const moverPosicionPiezasGlobal = new MoverPosicionPiezasGlobal()
-        moverPosicionPiezasGlobal.execute(req.body, req.params)
+        moverPosicionPiezasGlobal.execute(req.body, req.headers, req.params)
             .then(partida => res.status(201).json(partida))
             .catch(error => handleError(error, res))
     }

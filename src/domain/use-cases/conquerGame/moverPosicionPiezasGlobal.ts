@@ -15,8 +15,9 @@ export class MoverPosicionPiezasGlobal {
 
     }
 
-    public async execute(body: any, params: any) {
-        const posicionPiezaGlobal = body.posicionPiezasGlobal
+    public async execute(body: any, headers: any, params: any) {
+        const posicionPiezaGlobal = body.posicionPiezasGlobal;
+        const conquerGameHeader: ConquerGameInterface = headers.conquerGame;
         try {
             const conquerGame: ConquerGameInterface = await ConquerGameModel.findOneAndUpdate(
                 {
@@ -55,6 +56,9 @@ export class MoverPosicionPiezasGlobal {
                 }
                 this.ioSocketService.sendMessage(`conquerGame${conquerGame.numeroPartida}FinalizarPartida`,
                     { mensaje: `El ganador es el jugador ${mensajeF}` });
+            } else if (body.reyesVivos.length !== conquerGameHeader.reyesVivos.length) {
+                this.ioSocketService.sendMessage(`conquerGame${conquerGame.numeroPartida}AsignarNuevaPiezaJugador`,
+                    convertirMongoAJson(conquerGame!));
             } else if (body.reyesVivos.length > 1) {
                 //Si existen varios reyes vivos
                 this.ioSocketService.sendMessage(`conquerGame${conquerGame.numeroPartida}MoverPosicionPiezasGlobal`,
