@@ -16,9 +16,4 @@ export interface ConquerGameInterface {
     posicionPiezasGlobal: posicionPiezasGlobal[];
     turno: String;
     reyesVivos: string[];
-    // id: string;
-    // createAt: Date;
-    // handleAtDesk?: string;//Escritorio
-    // handleAt?: Date;
-    // done: boolean;
 }

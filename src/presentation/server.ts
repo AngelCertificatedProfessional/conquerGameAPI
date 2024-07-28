@@ -1,7 +1,6 @@
 import express, { Router } from 'express'
 import cors from 'cors'
 import compression from 'compression'
-// const { AppRoutes } = require('./routes');
 
 interface Options {
     port: number;
@@ -23,13 +22,6 @@ export class Server {
         this.app.use(express.json());
         this.app.use(compression())
         this.app.use(express.static('public'));
-        // this.server = require('http').createServer(this.app);
-
-        // /*Seccion de sockets*/
-        //this.socket = require('../sockets/controller'); 
-        //sockets
-        //this.sockets();
-
     }
 
     async start() {
@@ -41,19 +33,4 @@ export class Server {
     public setRoutes(router: Router) {
         this.app.use(router);
     }
-
-    // sockets() {
-    //     this.socket.connect(this.server)
-    // }
-
-    listen() {
-        // se remplazar por server para ejecutar el scoket
-        // this.app.listen(this.port, () => {
-        //     console.log(`Servidor Corriendo en el puerto ${process.env.PORT}`)
-        // });
-        // this.server.listen(this.port, () => {
-        //     console.log(`Servidor Corriendo en el puerto ${process.env.PORT}`)
-        // });
-    }
-
 }

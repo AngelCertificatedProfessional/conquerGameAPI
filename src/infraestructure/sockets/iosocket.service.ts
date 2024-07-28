@@ -4,11 +4,9 @@
 import { Server } from 'http';
 import { Server as ServerSocket } from "socket.io";
 const socketio = require('socket.io');
-// import { WebSocket, WebSocketServer } from 'ws'
 
 interface Options {
     server: Server;
-    // path?: string;//
 }
 
 export class IoSocketService {
@@ -41,16 +39,8 @@ export class IoSocketService {
             console.log("conectado")
             socket.on('disconnect', async () => {
                 console.log('Cliente desconectado')
-                // await usuarioDesconectado(uid)
-                // //Cuando nos desconectamos haremos que refresque a todos los usuarios
-                // this.io.emit('lista-usuarios', await getUsuarios())
             })
         })
-        //     this.wss.on('connection', (ws: WebSocket) => {
-        //         console.log('Client connected')
-
-        //         ws.on('close', () => console.log('CLient disconnected'))
-        //     })
 
     }
 }
